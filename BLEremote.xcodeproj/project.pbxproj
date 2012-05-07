@@ -1,0 +1,235 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXFileReference section */
+		472E191F1557C65800E6BA7E /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
+		472E19201557C65800E6BA7E /* Makefile */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
+		472E192F1557CB2800E6BA7E /* i2cmaster.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = i2cmaster.h; sourceTree = "<group>"; };
+		472E19301557CB2800E6BA7E /* i2cmaster.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = i2cmaster.c; sourceTree = "<group>"; };
+		472E19311557CCC100E6BA7E /* 24c_eeprom.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = 24c_eeprom.c; sourceTree = "<group>"; };
+		472E19321557CCD100E6BA7E /* 24c_eeprom.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = 24c_eeprom.h; sourceTree = "<group>"; };
+		472E19351557DBF400E6BA7E /* group__jwj__24ceeprom.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; name = group__jwj__24ceeprom.html; path = html/group__jwj__24ceeprom.html; sourceTree = "<group>"; };
+		472E19361557DBF400E6BA7E /* group__pfleury__ic2master.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; name = group__pfleury__ic2master.html; path = html/group__pfleury__ic2master.html; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		472E19141557C65800E6BA7E = {
+			isa = PBXGroup;
+			children = (
+				472E19331557D30D00E6BA7E /* Documentation */,
+				472E191E1557C65800E6BA7E /* BLEremote */,
+			);
+			sourceTree = "<group>";
+		};
+		472E191E1557C65800E6BA7E /* BLEremote */ = {
+			isa = PBXGroup;
+			children = (
+				472E19321557CCD100E6BA7E /* 24c_eeprom.h */,
+				472E19311557CCC100E6BA7E /* 24c_eeprom.c */,
+				472E192F1557CB2800E6BA7E /* i2cmaster.h */,
+				472E19301557CB2800E6BA7E /* i2cmaster.c */,
+				472E191F1557C65800E6BA7E /* main.c */,
+				472E19201557C65800E6BA7E /* Makefile */,
+			);
+			path = BLEremote;
+			sourceTree = "<group>";
+		};
+		472E19331557D30D00E6BA7E /* Documentation */ = {
+			isa = PBXGroup;
+			children = (
+				472E19351557DBF400E6BA7E /* group__jwj__24ceeprom.html */,
+				472E19361557DBF400E6BA7E /* group__pfleury__ic2master.html */,
+			);
+			name = Documentation;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXLegacyTarget section */
+		472E191B1557C65800E6BA7E /* build */ = {
+			isa = PBXLegacyTarget;
+			buildArgumentsString = "all -C $(PROJECT)";
+			buildConfigurationList = 472E19231557C65800E6BA7E /* Build configuration list for PBXLegacyTarget "build" */;
+			buildPhases = (
+			);
+			buildToolPath = make;
+			dependencies = (
+			);
+			name = build;
+			passBuildSettingsInEnvironment = 1;
+			productName = build;
+		};
+		472E191C1557C65800E6BA7E /* fuse */ = {
+			isa = PBXLegacyTarget;
+			buildArgumentsString = "fuse -C $(PROJECT)";
+			buildConfigurationList = 472E19261557C65800E6BA7E /* Build configuration list for PBXLegacyTarget "fuse" */;
+			buildPhases = (
+			);
+			buildToolPath = /usr/bin/make;
+			dependencies = (
+			);
+			name = fuse;
+			passBuildSettingsInEnvironment = 1;
+			productName = fuse;
+		};
+		472E191D1557C65800E6BA7E /* flash */ = {
+			isa = PBXLegacyTarget;
+			buildArgumentsString = "flash -C $(PROJECT)";
+			buildConfigurationList = 472E19291557C65800E6BA7E /* Build configuration list for PBXLegacyTarget "flash" */;
+			buildPhases = (
+			);
+			buildToolPath = /usr/bin/make;
+			dependencies = (
+			);
+			name = flash;
+			passBuildSettingsInEnvironment = 1;
+			productName = flash;
+		};
+/* End PBXLegacyTarget section */
+
+/* Begin PBXProject section */
+		472E19161557C65800E6BA7E /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0430;
+				ORGANIZATIONNAME = "Greener Pastures";
+			};
+			buildConfigurationList = 472E19191557C65800E6BA7E /* Build configuration list for PBXProject "BLEremote" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 472E19141557C65800E6BA7E;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				472E191B1557C65800E6BA7E /* build */,
+				472E191C1557C65800E6BA7E /* fuse */,
+				472E191D1557C65800E6BA7E /* flash */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin XCBuildConfiguration section */
+		472E19211557C65800E6BA7E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				PATH = "$(PATH):/usr/local/CrossPack-AVR/bin";
+			};
+			name = Debug;
+		};
+		472E19221557C65800E6BA7E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				PATH = "$(PATH):/usr/local/CrossPack-AVR/bin";
+			};
+			name = Release;
+		};
+		472E19241557C65800E6BA7E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		472E19251557C65800E6BA7E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		472E19271557C65800E6BA7E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		472E19281557C65800E6BA7E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Release;
+		};
+		472E192A1557C65800E6BA7E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		472E192B1557C65800E6BA7E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		472E19191557C65800E6BA7E /* Build configuration list for PBXProject "BLEremote" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				472E19211557C65800E6BA7E /* Debug */,
+				472E19221557C65800E6BA7E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		472E19231557C65800E6BA7E /* Build configuration list for PBXLegacyTarget "build" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				472E19241557C65800E6BA7E /* Debug */,
+				472E19251557C65800E6BA7E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+		472E19261557C65800E6BA7E /* Build configuration list for PBXLegacyTarget "fuse" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				472E19271557C65800E6BA7E /* Debug */,
+				472E19281557C65800E6BA7E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+		472E19291557C65800E6BA7E /* Build configuration list for PBXLegacyTarget "flash" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				472E192A1557C65800E6BA7E /* Debug */,
+				472E192B1557C65800E6BA7E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 472E19161557C65800E6BA7E /* Project object */;
+}
