@@ -12,7 +12,7 @@
 
 /**
  @defgroup pfleury_ic2master I2C Master library
- @code #include <i2cmaster.h> @endcode
+ @code #include "i2cmaster.h" @endcode
   
  @brief I2C (TWI) Master Software Library
 

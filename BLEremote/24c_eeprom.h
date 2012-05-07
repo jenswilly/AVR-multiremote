@@ -12,7 +12,7 @@
 @defgroup jwj_24ceeprom 24C EEPROM library
  @brief Utility functions for using 24C series EEPROMs.
  
- @code #include <24c_eeprom.h> @endcode
+ @code #include "24c_eeprom.h" @endcode
 
  24C EEPROM Library
  

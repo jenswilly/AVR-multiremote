@@ -1,7 +1,10 @@
 var NAVTREE =
 [
   [ "BLE IR Remote", "index.html", [
-    [ "Modules", "modules.html", "modules" ]
+    [ "Modules", "modules.html", "modules" ],
+    [ "Files", null, [
+      [ "File List", "files.html", "files" ]
+    ] ]
   ] ]
 ];
 

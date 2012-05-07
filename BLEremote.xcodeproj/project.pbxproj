@@ -15,6 +15,9 @@
 		472E19321557CCD100E6BA7E /* 24c_eeprom.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = 24c_eeprom.h; sourceTree = "<group>"; };
 		472E19351557DBF400E6BA7E /* group__jwj__24ceeprom.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; name = group__jwj__24ceeprom.html; path = html/group__jwj__24ceeprom.html; sourceTree = "<group>"; };
 		472E19361557DBF400E6BA7E /* group__pfleury__ic2master.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; name = group__pfleury__ic2master.html; path = html/group__pfleury__ic2master.html; sourceTree = "<group>"; };
+		472E19471557FF6900E6BA7E /* infrared.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = infrared.c; sourceTree = "<group>"; };
+		472E19491557FF7A00E6BA7E /* infrared.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = infrared.h; sourceTree = "<group>"; };
+		472E194A155803CB00E6BA7E /* readme.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = readme.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -29,6 +32,8 @@
 		472E191E1557C65800E6BA7E /* BLEremote */ = {
 			isa = PBXGroup;
 			children = (
+				472E19491557FF7A00E6BA7E /* infrared.h */,
+				472E19471557FF6900E6BA7E /* infrared.c */,
 				472E19321557CCD100E6BA7E /* 24c_eeprom.h */,
 				472E19311557CCC100E6BA7E /* 24c_eeprom.c */,
 				472E192F1557CB2800E6BA7E /* i2cmaster.h */,
@@ -42,6 +47,7 @@
 		472E19331557D30D00E6BA7E /* Documentation */ = {
 			isa = PBXGroup;
 			children = (
+				472E194A155803CB00E6BA7E /* readme.md */,
 				472E19351557DBF400E6BA7E /* group__jwj__24ceeprom.html */,
 				472E19361557DBF400E6BA7E /* group__pfleury__ic2master.html */,
 			);
@@ -212,6 +218,7 @@
 				472E19251557C65800E6BA7E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		472E19261557C65800E6BA7E /* Build configuration list for PBXLegacyTarget "fuse" */ = {
 			isa = XCConfigurationList;
@@ -220,6 +227,7 @@
 				472E19281557C65800E6BA7E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		472E19291557C65800E6BA7E /* Build configuration list for PBXLegacyTarget "flash" */ = {
 			isa = XCConfigurationList;
@@ -228,6 +236,7 @@
 				472E192B1557C65800E6BA7E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

@@ -7,7 +7,13 @@
 
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
-
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript">
+  $(document).ready(initResizable);
+</script>
 
 
 </head>
@@ -49,6 +55,19 @@
     </ul>
   </div>
 </div>
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+  initNavTree('24c__eeprom_8h.html','');
+</script>
+<div id="doc-content">
 <div class="header">
   <div class="headertitle">
 <div class="title">BLEremote/24c_eeprom.h</div>  </div>
@@ -72,18 +91,22 @@
 <a name="l00049"></a>00049 
 <a name="l00054"></a>00054 uint8_t <a class="code" href="group__jwj__24ceeprom.html#gaf4431c122495125604cd8c273b75a9e8">readByte</a>( <span class="keywordtype">int</span> address );
 <a name="l00055"></a>00055 
-<a name="l00059"></a>00059 uint8_t <a class="code" href="group__jwj__24ceeprom.html#ga0e069f6b0010a310b9ef0634ff0de163">readNextByte</a>();
+<a name="l00059"></a>00059 uint8_t <a class="code" href="group__jwj__24ceeprom.html#ga491eb70b656706164e85bcaa06802067">readCurrentByte</a>();
 <a name="l00060"></a>00060 
 <a name="l00061"></a>00061 
-<a name="l00071"></a>00071 <span class="keywordtype">int</span> <a class="code" href="group__jwj__24ceeprom.html#gaf35792a28e4abccfac9eda42220ed31c" title="Reads sequential data.">readData</a>( <span class="keywordtype">int</span> address, <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> *data, <span class="keywordtype">int</span> len );
+<a name="l00070"></a>00070 <span class="keywordtype">void</span> <a class="code" href="group__jwj__24ceeprom.html#gafbed54802c54fd7fd5d442853bca2053" title="Reads sequential data.">readData</a>( <span class="keywordtype">int</span> address, <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> *data, <span class="keywordtype">int</span> len );
 </pre></div></div><!-- contents -->
+</div>
+  <div id="nav-path" class="navpath">
+    <ul>
+      <li class="navelem"><b>24c_eeprom.h</b>      </li>
 
+    <li class="footer">Generated on Mon May 7 2012 23:18:31 for BLE IR Remote by
+    <a href="http://www.doxygen.org/index.html">
+    <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.0 </li>
+   </ul>
+ </div>
 
-<hr class="footer"/><address class="footer"><small>
-Generated on Mon May 7 2012 13:57:19 for BLE IR Remote by &#160;<a href="http://www.doxygen.org/index.html">
-<img class="footer" src="doxygen.png" alt="doxygen"/>
-</a> 1.8.0
-</small></address>
 
 </body>
 </html>

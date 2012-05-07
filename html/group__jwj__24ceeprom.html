@@ -7,7 +7,13 @@
 
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
-
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript">
+  $(document).ready(initResizable);
+</script>
 
 
 </head>
@@ -44,6 +50,19 @@
     </ul>
   </div>
 </div>
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+  initNavTree('group__jwj__24ceeprom.html','');
+</script>
+<div id="doc-content">
 <div class="header">
   <div class="summary">
 <a href="#define-members">Defines</a> &#124;
@@ -64,12 +83,12 @@ Functions</h2></td></tr>
 <tr class="memitem:gaf63d7f39b4ac6560d4f0006ff6f2a9e4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__jwj__24ceeprom.html#gaf63d7f39b4ac6560d4f0006ff6f2a9e4">writeByte</a> (int address, uint8_t data)</td></tr>
 <tr class="memitem:ga651e55eecf458695047f09a8b1042b97"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__jwj__24ceeprom.html#ga651e55eecf458695047f09a8b1042b97">writePage</a> (int address, unsigned char *data, uint8_t len)</td></tr>
 <tr class="memitem:gaf4431c122495125604cd8c273b75a9e8"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__jwj__24ceeprom.html#gaf4431c122495125604cd8c273b75a9e8">readByte</a> (int address)</td></tr>
-<tr class="memitem:ga0e069f6b0010a310b9ef0634ff0de163"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__jwj__24ceeprom.html#ga0e069f6b0010a310b9ef0634ff0de163">readNextByte</a> ()</td></tr>
-<tr class="memitem:gaf35792a28e4abccfac9eda42220ed31c"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__jwj__24ceeprom.html#gaf35792a28e4abccfac9eda42220ed31c">readData</a> (int address, unsigned char *data, int len)</td></tr>
-<tr class="memdesc:gaf35792a28e4abccfac9eda42220ed31c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reads sequential data.  <a href="#gaf35792a28e4abccfac9eda42220ed31c"></a><br/></td></tr>
+<tr class="memitem:ga491eb70b656706164e85bcaa06802067"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__jwj__24ceeprom.html#ga491eb70b656706164e85bcaa06802067">readCurrentByte</a> ()</td></tr>
+<tr class="memitem:gafbed54802c54fd7fd5d442853bca2053"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__jwj__24ceeprom.html#gafbed54802c54fd7fd5d442853bca2053">readData</a> (int address, unsigned char *data, int len)</td></tr>
+<tr class="memdesc:gafbed54802c54fd7fd5d442853bca2053"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reads sequential data.  <a href="#gafbed54802c54fd7fd5d442853bca2053"></a><br/></td></tr>
 </table>
 <hr/><a name="details" id="details"></a><h2>Detailed Description</h2>
-<div class="fragment"><pre class="fragment"><span class="preprocessor"> #include &lt;24c_eeprom.h&gt;</span> 
+<div class="fragment"><pre class="fragment"><span class="preprocessor"> #include &quot;24c_eeprom.h&quot;</span> 
 </pre></div><p>24C EEPROM Library</p>
 <p>The 24C EEPROM library contains helper functions for using the 24C (specifically, M24C64) series EEPROMs.</p>
 <dl class="section note"><dt>Note:</dt><dd>This library requires I2C functions compatible with <a href="http://jump.to/fleury">Peter Fleury's I2C (TWI) Master Software Library</a>!</dd></dl>
@@ -115,12 +134,30 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="gaf35792a28e4abccfac9eda42220ed31c"></a>
+<a class="anchor" id="ga491eb70b656706164e85bcaa06802067"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">int <a class="el" href="group__jwj__24ceeprom.html#gaf35792a28e4abccfac9eda42220ed31c">readData</a> </td>
+          <td class="memname">uint8_t <a class="el" href="group__jwj__24ceeprom.html#ga491eb70b656706164e85bcaa06802067">readCurrentByte</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Reads the byte at the current memory address. The address pointer is incremented after reading. </p>
+<dl class="section return"><dt>Returns:</dt><dd>The 8 bit value stored at the current memory address. </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="gafbed54802c54fd7fd5d442853bca2053"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="group__jwj__24ceeprom.html#gafbed54802c54fd7fd5d442853bca2053">readData</a> </td>
           <td>(</td>
           <td class="paramtype">int&#160;</td>
           <td class="paramname"><em>address</em>, </td>
@@ -149,30 +186,11 @@ Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramname">address</td><td>The 16 bit memory address to start reading from. </td></tr>
     <tr><td class="paramname">data</td><td>Pointer to a buffer to receive read data. </td></tr>
-    <tr><td class="paramname">len</td><td>Number of bytes to read. </td></tr>
+    <tr><td class="paramname">len</td><td>Number of bytes to read.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns:</dt><dd>The number bytes read.</dd></dl>
 <p>This function reads <code>len</code> bytes from the specified address and forward. </p>
-
-</div>
-</div>
-<a class="anchor" id="ga0e069f6b0010a310b9ef0634ff0de163"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">uint8_t <a class="el" href="group__jwj__24ceeprom.html#ga0e069f6b0010a310b9ef0634ff0de163">readNextByte</a> </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div>
-<div class="memdoc">
-<p>Reads the byte at the current memory address. The address pointer is incremented after reading. </p>
-<dl class="section return"><dt>Returns:</dt><dd>The 8 bit value stored at the current memory address. </dd></dl>
 
 </div>
 </div>
@@ -256,13 +274,16 @@ Functions</h2></td></tr>
 </div>
 </div>
 </div><!-- contents -->
+</div>
+  <div id="nav-path" class="navpath">
+    <ul>
 
+    <li class="footer">Generated on Mon May 7 2012 23:18:31 for BLE IR Remote by
+    <a href="http://www.doxygen.org/index.html">
+    <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.0 </li>
+   </ul>
+ </div>
 
-<hr class="footer"/><address class="footer"><small>
-Generated on Mon May 7 2012 13:57:19 for BLE IR Remote by &#160;<a href="http://www.doxygen.org/index.html">
-<img class="footer" src="doxygen.png" alt="doxygen"/>
-</a> 1.8.0
-</small></address>
 
 </body>
 </html>
