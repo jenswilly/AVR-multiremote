@@ -9,6 +9,7 @@
 #include "24c_eeprom.h"
 #include "i2cmaster.h"
 
+/* Writes a single byte to the specified address */
 void writeByte( int address, uint8_t data )
 {
 	i2c_start_wait( EEPROM_ADDRESS + I2C_WRITE );
@@ -18,6 +19,7 @@ void writeByte( int address, uint8_t data )
 	i2c_stop();
 }
 
+/* Reads a single byte from the specified address */
 uint8_t readByte( int address )
 {
 	uint8_t data;
@@ -48,7 +50,7 @@ uint8_t readCurrentByte()
 /* Reads sequential data from the specified address */
 void readData( int address, unsigned char *data, int len )
 {
-	int read = 0;
+	int i;
 
 	i2c_start_wait( EEPROM_ADDRESS + I2C_WRITE );
 	i2c_write( address >> 8 );	// MSB of address
@@ -56,8 +58,24 @@ void readData( int address, unsigned char *data, int len )
 
 	// Start reading
 	i2c_rep_start( EEPROM_ADDRESS + I2C_READ );
-	for( read=0; read<len; read++ )
-		*data++ = i2c_read( (read < len-1) );	// Send ACK as long as read<len – i.e. we want another byte
+	for( i = 0; i < len; i++ )
+		*data++ = i2c_read( (i < len-1) );	// Send ACK as long as read<len – i.e. we want another byte
+	
+	i2c_stop();
+}
+
+/* Write up to 32 bytes. NB: heed warnings about adderss alignment and data size. */
+void writePage( int address, unsigned char *data, uint8_t len )
+{
+	int i;
+	
+	i2c_start_wait( EEPROM_ADDRESS + I2C_WRITE );
+	i2c_write( address >> 8 );	// MSB of address
+	i2c_write( address );		// LSB of address
+
+	// Write data
+	for( i = 0; i < len; i++ )
+		i2c_write( *data++ );
 	
 	i2c_stop();
 }
