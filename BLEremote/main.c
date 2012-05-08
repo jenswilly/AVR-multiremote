@@ -22,30 +22,30 @@ unsigned char testCmd[] =
 	06, 11, 00
 };
 
+usigned char recordBuffer[128];
+
 int main(void)
 {
+	IRError status;
+	
 	// Init IR
 	initIR();
 	
 	// Main loop
 	for( ;; )
 	{
-		// Lead-in
-//		sendPulseD( 8.8, 4.3 );
-//		
-//		// Address 04, NEC1 protocol
-//		sendNECByte( 0x04 );
-//		sendNECByte( ~0x04);
-//		
-//		// Command C5: discrete power-off
-//		sendNECCommand( 0xC5 );
-//		
-//		// Lead-out
-//		sendPulseD( 0.36, 80 );
-		
-
 		// Send sample "off" command
-		sendSequence( testCmd );
+		// sendSequence( testCmd );
+		
+		status = learnIR();
+		if( status != IRError_NoError )
+		{
+			// Error:
+		}
+		else
+		{
+			// No error: print data
+		}
 		
 		// Wait 3 secs
 		_delay_ms( 3000 );

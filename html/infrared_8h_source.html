@@ -96,26 +96,39 @@
 <a name="l00048"></a>00048 <span class="preprocessor"></span>
 <a name="l00050"></a><a class="code" href="group__jwj__infrared.html#ga26f53b7361e8f4529b048dfa1237908a">00050</a> <span class="preprocessor">#define TRIM 500</span>
 <a name="l00051"></a>00051 <span class="preprocessor"></span>
-<a name="l00059"></a>00059 <span class="keywordtype">void</span> <a class="code" href="group__jwj__infrared.html#gaa6e4c3e75b86ccd24c9e815d7dd53cfb">sendPulseD</a>( <span class="keywordtype">double</span> highTime, <span class="keywordtype">double</span> lowTime );
-<a name="l00060"></a>00060 
-<a name="l00070"></a>00070 <span class="keywordtype">void</span> <a class="code" href="group__jwj__infrared.html#ga0f861d99f6a01ff6d011c30dd8e15787">sendPulse</a>( uint8_t highTime, uint8_t lowTime );
-<a name="l00071"></a>00071 
-<a name="l00075"></a>00075 <span class="keywordtype">void</span> <a class="code" href="group__jwj__infrared.html#ga607d10b247d3ef3957a029dff92cca1e">sendNECByte</a>( uint8_t data );
+<a name="l00055"></a><a class="code" href="group__jwj__infrared.html#gaaa97f6f10e20a14cfa263886815d82d1">00055</a> <span class="preprocessor">#define IRSENSOR_PIN PIND</span>
+<a name="l00056"></a>00056 <span class="preprocessor"></span>
+<a name="l00060"></a><a class="code" href="group__jwj__infrared.html#ga520087114fe963e4e98974d2b741b427">00060</a> <span class="preprocessor">#define IRSENSOR_BIT PD3</span>
+<a name="l00061"></a>00061 <span class="preprocessor"></span>
+<a name="l00064"></a><a class="code" href="group__jwj__infrared.html#gab42c336f60f1c807ab3099b7c4d48f64">00064</a> <span class="keyword">enum</span> <a class="code" href="group__jwj__infrared.html#gab42c336f60f1c807ab3099b7c4d48f64">IRError</a> {
+<a name="l00066"></a><a class="code" href="group__jwj__infrared.html#ggab42c336f60f1c807ab3099b7c4d48f64acd8120817dbfbbfe6966830316bf9cc0">00066</a>         <a class="code" href="group__jwj__infrared.html#ggab42c336f60f1c807ab3099b7c4d48f64acd8120817dbfbbfe6966830316bf9cc0">IRError_NoError</a> = 0,
+<a name="l00068"></a><a class="code" href="group__jwj__infrared.html#ggab42c336f60f1c807ab3099b7c4d48f64aa2b590e6d122d91766177002d5349cd9">00068</a>         <a class="code" href="group__jwj__infrared.html#ggab42c336f60f1c807ab3099b7c4d48f64aa2b590e6d122d91766177002d5349cd9">IRError_SigTooLong</a>,
+<a name="l00070"></a><a class="code" href="group__jwj__infrared.html#ggab42c336f60f1c807ab3099b7c4d48f64af25811f4ce086a3a480c186b4b869bbc">00070</a>         <a class="code" href="group__jwj__infrared.html#ggab42c336f60f1c807ab3099b7c4d48f64af25811f4ce086a3a480c186b4b869bbc">IRError_NoSignal</a>,
+<a name="l00072"></a><a class="code" href="group__jwj__infrared.html#ggab42c336f60f1c807ab3099b7c4d48f64af2fb21c7c7064aea4848977e2eeeb604">00072</a>         <a class="code" href="group__jwj__infrared.html#ggab42c336f60f1c807ab3099b7c4d48f64af2fb21c7c7064aea4848977e2eeeb604">IRError_HighPulseTooLong</a>,
+<a name="l00074"></a><a class="code" href="group__jwj__infrared.html#ggab42c336f60f1c807ab3099b7c4d48f64a64c1d57fdfeecdd998cab6b469f2d3ce">00074</a>         <a class="code" href="group__jwj__infrared.html#ggab42c336f60f1c807ab3099b7c4d48f64a64c1d57fdfeecdd998cab6b469f2d3ce">IRError_LowPulseTooLong</a>
+<a name="l00075"></a>00075 };
 <a name="l00076"></a>00076 
-<a name="l00082"></a>00082 <span class="keywordtype">void</span> <a class="code" href="group__jwj__infrared.html#gaa93d02f9f48cf317a4d2d9410a240c9f">sendNECCommand</a>( uint8_t data );
-<a name="l00083"></a>00083 
-<a name="l00094"></a>00094 <span class="keywordtype">void</span> <a class="code" href="group__jwj__infrared.html#ga3ef44fa7f9e2694386cefa711bbefa96">sendSequence</a>( <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> *data );
-<a name="l00095"></a>00095 
-<a name="l00099"></a>00099 <span class="keywordtype">void</span> <a class="code" href="group__jwj__infrared.html#ga3fc8699debb6da1fce7cc7c1043484c4">initIR</a>();
-<a name="l00100"></a>00100 
-<a name="l00103"></a>00103 <span class="preprocessor">#endif</span>
+<a name="l00084"></a>00084 <span class="keywordtype">void</span> <a class="code" href="group__jwj__infrared.html#gaa6e4c3e75b86ccd24c9e815d7dd53cfb">sendPulseD</a>( <span class="keywordtype">double</span> highTime, <span class="keywordtype">double</span> lowTime );
+<a name="l00085"></a>00085 
+<a name="l00095"></a>00095 <span class="keywordtype">void</span> <a class="code" href="group__jwj__infrared.html#ga0f861d99f6a01ff6d011c30dd8e15787">sendPulse</a>( uint8_t highTime, uint8_t lowTime );
+<a name="l00096"></a>00096 
+<a name="l00100"></a>00100 <span class="keywordtype">void</span> <a class="code" href="group__jwj__infrared.html#ga607d10b247d3ef3957a029dff92cca1e">sendNECByte</a>( uint8_t data );
+<a name="l00101"></a>00101 
+<a name="l00107"></a>00107 <span class="keywordtype">void</span> <a class="code" href="group__jwj__infrared.html#gaa93d02f9f48cf317a4d2d9410a240c9f">sendNECCommand</a>( uint8_t data );
+<a name="l00108"></a>00108 
+<a name="l00119"></a>00119 <span class="keywordtype">void</span> <a class="code" href="group__jwj__infrared.html#ga3ef44fa7f9e2694386cefa711bbefa96">sendSequence</a>( <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> *data );
+<a name="l00120"></a>00120 
+<a name="l00124"></a>00124 <span class="keywordtype">void</span> <a class="code" href="group__jwj__infrared.html#ga3fc8699debb6da1fce7cc7c1043484c4">initIR</a>();
+<a name="l00125"></a>00125 
+<a name="l00135"></a>00135 uint8_t <a class="code" href="group__jwj__infrared.html#gaef373a4e83a9b5e2de6ad674f8e2bc8e">learnIR</a>( <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> *data );
+<a name="l00138"></a>00138 <span class="preprocessor">#endif</span>
 </pre></div></div><!-- contents -->
 </div>
   <div id="nav-path" class="navpath">
     <ul>
       <li class="navelem"><b>infrared.h</b>      </li>
 
-    <li class="footer">Generated on Mon May 7 2012 23:18:31 for BLE IR Remote by
+    <li class="footer">Generated on Tue May 8 2012 12:16:47 for BLE IR Remote by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.0 </li>
    </ul>

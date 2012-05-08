@@ -49,6 +49,48 @@
 /** The trim value is a number that is _subtracted_ from the specified time durations in order to compensate for the extra CPU cycles used in control loops etc. This value is really best determined by measuring the on/off times on an oscilloscope and adjusting the value (higher values = shorter durations) until the measured duration matches the specified duration. Nominally, the value is in microseconds. */
 #define TRIM 500
 
+/** The PINx used for reading the IR input signal. Configure this to match your hardware setup.
+ @see IRSENSOR_PIN
+ */
+#define IRSENSOR_PIN PIND
+
+/** The Pxy used for reading the IR input signal. Configure this to match your hardware setup. Obviously, the bit should match the PINx used.
+ @see IRSENSOR_PIN
+ */
+#define IRSENSOR_BIT PD3
+
+/** Maximum number of ticks (one tick equals TICK_DURATION µs for either a HIGH or LOW pulse. */
+#define MAXPULSE 2500
+
+/** Sample period length in microseconds. At every tick the IR input signal is sampled. This must correspond to the @link TICK_OCR @endlink value. */
+#define TICK_DURATION 10
+
+/** Number of MAXPULSE durations allowed until timeout occurs. This is used when waiting for the initial signal. If a time equal to TIMEOUT_COUNT * MAXPULSE * TICK_DURATION microseconds passes, a timeout occurs. */
+#define TIMEOUT_COUNT 200
+
+/** Output compare value for the 8 bit Timer0 to match the TICK_DURATION. Values can be calculated here: http://www.et06.dk/atmega_timers/
+ */
+#define TICK_OCR 0xA0
+
+/** Prescaler for the TICK_OCR value to match the TICK_DURATION.
+ */
+#define TICK_PRESCALER (1<< CS00)
+
+/** Error codes for the learnIR() function
+ */
+typedef enum {
+	/** No error - operation suceeded */
+	IRError_NoError = 0,
+	/** The signal length exceeds 64 byte pairs and so cannot fit in the 128 byte data buffer */
+	IRError_SigTooLong,
+	/** No signal was detected */
+	IRError_NoSignal,
+	/** A HIGH pulse duration exceeded 25 ms */
+	IRError_HighPulseTooLong,
+	/** A LOW pulse duration exceeded 25 ms */
+	IRError_LowPulseTooLong
+} IRError;
+
 /** Sends an on-off pulse.
  @param highTime Time in milliseconds for the *ON* part of the pulse.
  @param lowTime Time in milliseconds for the *OFF* part of the pulse.
@@ -97,6 +139,17 @@ void sendSequence( unsigned char *data );
  @note Pin OC0B (PD5) is configured as output and used for the PWM signal.
  */
 void initIR();
+
+/** Reads an IR code and stores the on-off time pairs in the specified data buffer.
+ 
+ The signal will be stored as byte pairs where the first byte is ON time in 0.1 ms and the second byte is OFF time in 0.1 ms. The sequence is terminated by a 0x00 byte.
+ 
+ If the signal length exceeds 128 bytes, an @link IRError_SigTooLong @endlink is returned.
+ @param data A pointer to 128 bytes large memory block for storing the recorded IR signal.
+ @return 0 if a valid signal was recorded. Otherwise a @link IRError @endlink value is returned.
+ @retval 0 A valid signal was recorded and stored in the data buffer.
+ */ 
+IRError learnIR( unsigned char data[] );
 
 /**@}*/
 
