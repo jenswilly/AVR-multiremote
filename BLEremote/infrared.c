@@ -9,12 +9,15 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #include <avr/interrupt.h>
+#include <stdio.h>
 #include "infrared.h"
+
+extern FILE mystdout;
 
 // The following variables are used when learning IR codes
 volatile unsigned int pulseDuration;
-volatile int pulseBufPr;
-volatile uint8_t pulseOverflow;
+volatile unsigned int pulseBufPr;
+volatile unsigned int pulseOverflow;
 
 /* Sends a high-low pulse
  * Specify times for high duration and low duration in ms
@@ -90,6 +93,97 @@ ISR( TIMER0_COMPA_vect )
 	}
 }
 
+IRError learnTEST( unsigned char data[] )
+{
+	unsigned int buffer[ 128 ];
+	int i;
+	
+	IRError status = IRError_NoError;
+	
+	DDRD |= (1<< PD6);	// PD6/OC0A -> output
+	DDRB |= (1<< PB1);	// PB1/OC1A -> output
+	
+	// Initialize Timer0 for the specified sample interval (we're not sending IR codes while we're learning so we might as well use the same timer instead of hogging one more timer).
+	TCCR0A = (1<< WGM01);	// CTC mode
+	TCCR0B = (1<< CS00);	// Start with prescaler 1
+	OCR0A = TICK_OCR;		// Sample interval
+	TIMSK0 = (1<< OCIE0A);	// Enable OCRA interrupt 
+	sei();
+	
+	// Init
+	pulseDuration = 0;
+	pulseBufPr = 0;
+	pulseOverflow = 0;
+	
+	// Wait for initial signal
+	while( (IRSENSOR_PIN & (1<< IRSENSOR_BIT)) && pulseOverflow < TIMEOUT_COUNT )
+		;
+
+	// Check for timeout
+	if( pulseOverflow >= TIMEOUT_COUNT )
+	{
+		status = IRError_NoSignal;
+		goto done;
+	}
+
+	while( 1 )
+	{
+		// Wait for LOW pulse (=pin HIGH) or pulse overflow
+		cli();
+		pulseDuration = 0;
+		pulseOverflow = 0;
+		sei();
+		while( (IRSENSOR_PIN & (1<< IRSENSOR_BIT)) == 0 && pulseOverflow == 0 )
+			;
+		
+		if( pulseOverflow > 0 )
+		{
+			// HIGH signal too long to store in one byte
+			status = IRError_HighPulseTooLong;
+			goto done;
+		}
+
+		// Store HIGH value
+		buffer[ pulseBufPr++ ] = pulseDuration;
+		
+		// Wait for HIGH pulse (=pin LOW) or pulse overflow
+		cli();
+		pulseDuration = 0;
+		sei();
+		while( (IRSENSOR_PIN & (1<< IRSENSOR_BIT)) && pulseOverflow == 0 )
+			;
+		
+		if( pulseOverflow > 0 )
+		{
+			// LOW overflow is interpreted as "signal end"
+			break;
+			goto done;
+		}
+		
+		// Store LOW value
+		buffer[ pulseBufPr++ ] = pulseDuration;
+	}
+	
+	// Terminate with 0
+	data[ pulseBufPr ] = 0;
+
+done:
+	initIR();
+	
+	// Did we get some data?
+	if( pulseBufPr > 0 )
+	{
+		// Yes: convert it from raw sample times to .1 ms intervals
+		for( i=0; i<pulseBufPr; i += 2 )
+		{
+			data[i] = buffer[i] * TICK_DURATION / 100;
+			data[i+1] = buffer[i+1] * TICK_DURATION / 100;
+		}
+	}
+	return status;
+}
+
+
 /* Record an IR signal and store it in the specified data buffer
  */
 IRError learnIR( unsigned char data[] )
@@ -134,8 +228,8 @@ IRError learnIR( unsigned char data[] )
 		/// DEBUG1: LED on
 		PORTB |= (1<< PB0);
 
-		// Wait for LWO pulse (=pin HIGH) or pulse overflow
-		while( (IRSENSOR_PIN & (1<< IRSENSOR_BIT)) == 0 && pulseOverflow == 0 )
+		// Wait for LOW pulse (=pin HIGH) or pulse overflow
+		while( (IRSENSOR_PIN & (1<< IRSENSOR_BIT)) == 0 )
 			;
 		
 		// Store HIGH value
@@ -149,6 +243,7 @@ IRError learnIR( unsigned char data[] )
 		{
 			// Overflow
 			status = IRError_HighPulseTooLong;
+			fprintf( &mystdout, "Overflow: %d; Duration: %d; BufPtr: %d\n\r", pulseOverflow, pulseDuration, pulseBufPr );
 			goto quit;
 		}
 		
@@ -156,7 +251,7 @@ IRError learnIR( unsigned char data[] )
 		PORTB &= ~(1<< PB0);
 
 		// Wait for HIGH pulse (=pin LOW) or pulse overflow
-		while( (IRSENSOR_PIN & (1<< IRSENSOR_BIT)) && pulseOverflow == 0 )
+		while( (IRSENSOR_PIN & (1<< IRSENSOR_BIT))  )
 			;
 		
 		// Store LOW value

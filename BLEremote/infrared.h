@@ -57,7 +57,7 @@
 /** The Pxy used for reading the IR input signal. Configure this to match your hardware setup. Obviously, the bit should match the PINx used.
  @see IRSENSOR_PIN
  */
-#define IRSENSOR_BIT PB1
+#define IRSENSOR_BIT PB2
 
 /** Maximum number of ticks (one tick equals TICK_DURATION µs for either a HIGH or LOW pulse. */
 #define MAXPULSE 2500
@@ -150,6 +150,8 @@ void initIR();
  @retval 0 A valid signal was recorded and stored in the data buffer.
  */ 
 IRError learnIR( unsigned char data[] );
+
+IRError learnTEST( unsigned char data[] );
 
 /**@}*/
 
