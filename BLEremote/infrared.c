@@ -84,9 +84,14 @@ ISR( TIMER0_COMPA_vect )
 	
 	// Check for pulse duration overflow
 	if( pulseDuration >= MAXPULSE )
+	{
 		pulseOverflow++;
+		pulseDuration = 0;
+	}
 }
 
+/* Record an IR signal and store it in the specified data buffer
+ */
 IRError learnIR( unsigned char data[] )
 {
 	IRError status = IRError_NoError;
@@ -108,7 +113,7 @@ IRError learnIR( unsigned char data[] )
 	TCCR0B = TICK_PRESCALER;	// Start with specified prescaler
 
 	// Wait for HIGH pulse (=pin LOW) or timeout
-	while( (IRSENSOR_PIN & IRSENSOR_BIT) && pulseOverflow < TIMEOUT_COUNT )
+	while( (IRSENSOR_PIN & (1<< IRSENSOR_BIT)) && pulseOverflow < TIMEOUT_COUNT )
 		;
 	
 	// Start pulse duration counter immediately
@@ -124,16 +129,17 @@ IRError learnIR( unsigned char data[] )
 	// Reset overflow counter
 	pulseOverflow = 0;
 	
-	/// DEBUG1
-	
 	while( 1 )
 	{
+		/// DEBUG1: LED on
+		PORTB |= (1<< PB0);
+
 		// Wait for LWO pulse (=pin HIGH) or pulse overflow
 		while( (IRSENSOR_PIN & (1<< IRSENSOR_BIT)) == 0 && pulseOverflow == 0 )
 			;
 		
 		// Store HIGH value
-		data[ pulseBufPr++ ] = pulseDuration * 100 / TICK_DURATION;	// Convert from sample interval to 100 µsecs
+		data[ pulseBufPr++ ] = pulseDuration * TICK_DURATION / 100;	// Convert from sample interval to 100 µsecs
 		
 		// Restart pulse duration counter
 		pulseDuration = 0;
@@ -146,12 +152,15 @@ IRError learnIR( unsigned char data[] )
 			goto quit;
 		}
 		
+		/// DEBUG1: LED off
+		PORTB &= ~(1<< PB0);
+
 		// Wait for HIGH pulse (=pin LOW) or pulse overflow
 		while( (IRSENSOR_PIN & (1<< IRSENSOR_BIT)) && pulseOverflow == 0 )
 			;
 		
 		// Store LOW value
-		data[ pulseBufPr++ ] = pulseDuration * 100 / TICK_DURATION;	// Convert from sample interval to 100 µsecs
+		data[ pulseBufPr++ ] = pulseDuration * TICK_DURATION / 100;	// Convert from sample interval to 100 µsecs
 		
 		// Restart pulse duration counter
 		pulseDuration = 0;
@@ -170,6 +179,9 @@ IRError learnIR( unsigned char data[] )
 quit:
 	// Re-initialize Timer0 for IR PWM
 	initIR();
+	
+	/// DEBUG2
+	PORTB &= ~(1<< PB0);
 	
 	return status;
 }

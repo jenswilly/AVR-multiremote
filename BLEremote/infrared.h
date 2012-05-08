@@ -52,12 +52,12 @@
 /** The PINx used for reading the IR input signal. Configure this to match your hardware setup.
  @see IRSENSOR_PIN
  */
-#define IRSENSOR_PIN PIND
+#define IRSENSOR_PIN PINB
 
 /** The Pxy used for reading the IR input signal. Configure this to match your hardware setup. Obviously, the bit should match the PINx used.
  @see IRSENSOR_PIN
  */
-#define IRSENSOR_BIT PD3
+#define IRSENSOR_BIT PB1
 
 /** Maximum number of ticks (one tick equals TICK_DURATION µs for either a HIGH or LOW pulse. */
 #define MAXPULSE 2500
@@ -82,13 +82,13 @@ typedef enum {
 	/** No error - operation suceeded */
 	IRError_NoError = 0,
 	/** The signal length exceeds 64 byte pairs and so cannot fit in the 128 byte data buffer */
-	IRError_SigTooLong,
+	IRError_SigTooLong = 1,
 	/** No signal was detected */
-	IRError_NoSignal,
+	IRError_NoSignal = 2,
 	/** A HIGH pulse duration exceeded 25 ms */
-	IRError_HighPulseTooLong,
+	IRError_HighPulseTooLong = 3,
 	/** A LOW pulse duration exceeded 25 ms */
-	IRError_LowPulseTooLong
+	IRError_LowPulseTooLong = 4
 } IRError;
 
 /** Sends an on-off pulse.

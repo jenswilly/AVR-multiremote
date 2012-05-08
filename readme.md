@@ -41,3 +41,10 @@ Thus, for my LG television which uses the [NEC1](http://www.sbprojects.com/knowl
 	6, 6, 6, 17, 6, 6, 6, 17, 6, 17, 6, 17, 6, 6, 6, 6
 	
 For a total of 66 bytes for a code that basically consists of two (!) bytes. Way inefficient! I know.
+
+## Recording IR codes
+
+The algorithm for recording IR signals is based on [this tutorial](http://www.ladyada.net/learn/sensors/ir.html) from Ladyada.  
+I use Timer0 on a 100 kHz frequency to keep count of 0.01 ms (10 µs) intervals ("ticks"). If I get more than 2500 ticks, more than 25 ms has passed and we have exceeded the longest time interval we can store in one byte (almost at least – the real max is 25.5).
+When waiting for the first transition to LOW (meaning a 38 kHz signal has been detected) I allow up to 200 overflows to occur (for a time of 5 seconds) since I don't store that time anyway.  
+After that I store the time interval in .1 ms increments in a data buffer and increase the buffer pointer for every pin LOW (=pulse present) and pin HIGH (=no pulse) state. If an overflow occurs while waiting for a pin LOW state I interpret that as a "signal ended" event (even though it might just be a long no-pulse interval) and overwrite the last pin HIGH data with 0x00 and stop the recording.
