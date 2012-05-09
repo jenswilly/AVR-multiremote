@@ -90,7 +90,7 @@ Functions</h2></td></tr>
 <hr/><a name="details" id="details"></a><h2>Detailed Description</h2>
 <div class="fragment"><pre class="fragment"><span class="preprocessor"> #include &quot;24c_eeprom.h&quot;</span> 
 </pre></div><p>24C EEPROM Library</p>
-<p>The 24C EEPROM library contains helper functions for using the 24C (specifically, M24C64) series EEPROMs.</p>
+<p>The 24C EEPROM library contains helper functions for using the 24C (specifically, Microchip 24LC512) series EEPROMs.</p>
 <dl class="section note"><dt>Note:</dt><dd>This library requires I2C functions compatible with <a href="http://jump.to/fleury">Peter Fleury's I2C (TWI) Master Software Library</a>!</dd></dl>
 <dl class="section author"><dt>Author:</dt><dd>Jens Willy Johannsen <a href="#" onclick="location.href='mai'+'lto:'+'jen'+'s@'+'jen'+'sw'+'ill'+'y.'+'dk'; return false;">jens@<span style="display: none;">.nosp@m.</span>jens<span style="display: none;">.nosp@m.</span>willy<span style="display: none;">.nosp@m.</span>.dk</a> <a href="http://atomslagstyrken.dk/arduino">http://atomslagstyrken.dk/arduino</a> </dd></dl>
 <hr/><h2>Define Documentation</h2>
@@ -264,12 +264,12 @@ Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramname">address</td><td>The 16 bit memory address to write to. </td></tr>
     <tr><td class="paramname">data</td><td>Pointer to the data to write. </td></tr>
-    <tr><td class="paramname">len</td><td>Length of data to write. <b>NOTE: This may not exceed 32 bytes</b></td></tr>
+    <tr><td class="paramname">len</td><td>Length of data to write. <b>NOTE: This should not exceed 128 bytes or weird stuff will happen</b></td></tr>
   </table>
   </dd>
 </dl>
-<p>A page is 32 bytes long. When writing a page, an internal memory address pointer is increased for every byte. But only the last 5 bits are increased. So if the data is longer than 32 bytes or the address is not aligned to the start of a page, the address pointer will wrap around to the start of the page and continue writing.</p>
-<dl class="section warning"><dt>Warning:</dt><dd>To align the address to the start of a page, the last five bits of the address <em>must</em> be 0. If this is not the case, the address pointer will wrap around to the start of the page and continue so the data written will not be in the same sequence as the original data. </dd></dl>
+<p>A page is 128 bytes long. When writing a page, an internal memory address pointer is increased for every byte. But only the last 7 bits are increased. So if the data is longer than 128 bytes or the address is not aligned to the start of a page, the address pointer will wrap around to the start of the page and continue writing.</p>
+<dl class="section warning"><dt>Warning:</dt><dd>To align the address to the start of a page, the last seven bits of the address <em>must</em> be 0. If this is not the case, the address pointer will wrap around to the start of the page and continue so the data written will not be in the same sequence as the original data. </dd></dl>
 
 </div>
 </div>
@@ -278,7 +278,7 @@ Functions</h2></td></tr>
   <div id="nav-path" class="navpath">
     <ul>
 
-    <li class="footer">Generated on Tue May 8 2012 12:16:47 for BLE IR Remote by
+    <li class="footer">Generated on Wed May 9 2012 23:39:28 for BLE IR Remote by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.0 </li>
    </ul>

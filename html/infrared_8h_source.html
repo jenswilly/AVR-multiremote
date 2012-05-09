@@ -94,41 +94,52 @@
 <a name="l00045"></a>00045 <span class="preprocessor"></span>
 <a name="l00047"></a><a class="code" href="group__jwj__infrared.html#gaa9fe7ae368a06503001c4e9303cb93c9">00047</a> <span class="preprocessor">#define PRESCALER_FLAGS (1&lt;&lt; CS01)</span>
 <a name="l00048"></a>00048 <span class="preprocessor"></span>
-<a name="l00050"></a><a class="code" href="group__jwj__infrared.html#ga26f53b7361e8f4529b048dfa1237908a">00050</a> <span class="preprocessor">#define TRIM 500</span>
+<a name="l00050"></a><a class="code" href="group__jwj__infrared.html#ga26f53b7361e8f4529b048dfa1237908a">00050</a> <span class="preprocessor">#define TRIM 300</span>
 <a name="l00051"></a>00051 <span class="preprocessor"></span>
-<a name="l00055"></a><a class="code" href="group__jwj__infrared.html#gaaa97f6f10e20a14cfa263886815d82d1">00055</a> <span class="preprocessor">#define IRSENSOR_PIN PIND</span>
+<a name="l00055"></a><a class="code" href="group__jwj__infrared.html#gaaa97f6f10e20a14cfa263886815d82d1">00055</a> <span class="preprocessor">#define IRSENSOR_PIN PINB</span>
 <a name="l00056"></a>00056 <span class="preprocessor"></span>
-<a name="l00060"></a><a class="code" href="group__jwj__infrared.html#ga520087114fe963e4e98974d2b741b427">00060</a> <span class="preprocessor">#define IRSENSOR_BIT PD3</span>
+<a name="l00060"></a><a class="code" href="group__jwj__infrared.html#ga520087114fe963e4e98974d2b741b427">00060</a> <span class="preprocessor">#define IRSENSOR_BIT PB2</span>
 <a name="l00061"></a>00061 <span class="preprocessor"></span>
-<a name="l00064"></a><a class="code" href="group__jwj__infrared.html#gab42c336f60f1c807ab3099b7c4d48f64">00064</a> <span class="keyword">enum</span> <a class="code" href="group__jwj__infrared.html#gab42c336f60f1c807ab3099b7c4d48f64">IRError</a> {
-<a name="l00066"></a><a class="code" href="group__jwj__infrared.html#ggab42c336f60f1c807ab3099b7c4d48f64acd8120817dbfbbfe6966830316bf9cc0">00066</a>         <a class="code" href="group__jwj__infrared.html#ggab42c336f60f1c807ab3099b7c4d48f64acd8120817dbfbbfe6966830316bf9cc0">IRError_NoError</a> = 0,
-<a name="l00068"></a><a class="code" href="group__jwj__infrared.html#ggab42c336f60f1c807ab3099b7c4d48f64aa2b590e6d122d91766177002d5349cd9">00068</a>         <a class="code" href="group__jwj__infrared.html#ggab42c336f60f1c807ab3099b7c4d48f64aa2b590e6d122d91766177002d5349cd9">IRError_SigTooLong</a>,
-<a name="l00070"></a><a class="code" href="group__jwj__infrared.html#ggab42c336f60f1c807ab3099b7c4d48f64af25811f4ce086a3a480c186b4b869bbc">00070</a>         <a class="code" href="group__jwj__infrared.html#ggab42c336f60f1c807ab3099b7c4d48f64af25811f4ce086a3a480c186b4b869bbc">IRError_NoSignal</a>,
-<a name="l00072"></a><a class="code" href="group__jwj__infrared.html#ggab42c336f60f1c807ab3099b7c4d48f64af2fb21c7c7064aea4848977e2eeeb604">00072</a>         <a class="code" href="group__jwj__infrared.html#ggab42c336f60f1c807ab3099b7c4d48f64af2fb21c7c7064aea4848977e2eeeb604">IRError_HighPulseTooLong</a>,
-<a name="l00074"></a><a class="code" href="group__jwj__infrared.html#ggab42c336f60f1c807ab3099b7c4d48f64a64c1d57fdfeecdd998cab6b469f2d3ce">00074</a>         <a class="code" href="group__jwj__infrared.html#ggab42c336f60f1c807ab3099b7c4d48f64a64c1d57fdfeecdd998cab6b469f2d3ce">IRError_LowPulseTooLong</a>
-<a name="l00075"></a>00075 };
-<a name="l00076"></a>00076 
-<a name="l00084"></a>00084 <span class="keywordtype">void</span> <a class="code" href="group__jwj__infrared.html#gaa6e4c3e75b86ccd24c9e815d7dd53cfb">sendPulseD</a>( <span class="keywordtype">double</span> highTime, <span class="keywordtype">double</span> lowTime );
-<a name="l00085"></a>00085 
-<a name="l00095"></a>00095 <span class="keywordtype">void</span> <a class="code" href="group__jwj__infrared.html#ga0f861d99f6a01ff6d011c30dd8e15787">sendPulse</a>( uint8_t highTime, uint8_t lowTime );
-<a name="l00096"></a>00096 
-<a name="l00100"></a>00100 <span class="keywordtype">void</span> <a class="code" href="group__jwj__infrared.html#ga607d10b247d3ef3957a029dff92cca1e">sendNECByte</a>( uint8_t data );
-<a name="l00101"></a>00101 
-<a name="l00107"></a>00107 <span class="keywordtype">void</span> <a class="code" href="group__jwj__infrared.html#gaa93d02f9f48cf317a4d2d9410a240c9f">sendNECCommand</a>( uint8_t data );
-<a name="l00108"></a>00108 
-<a name="l00119"></a>00119 <span class="keywordtype">void</span> <a class="code" href="group__jwj__infrared.html#ga3ef44fa7f9e2694386cefa711bbefa96">sendSequence</a>( <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> *data );
-<a name="l00120"></a>00120 
-<a name="l00124"></a>00124 <span class="keywordtype">void</span> <a class="code" href="group__jwj__infrared.html#ga3fc8699debb6da1fce7cc7c1043484c4">initIR</a>();
+<a name="l00063"></a><a class="code" href="group__jwj__infrared.html#ga7302231f8485e64ea42e2e726075b6ee">00063</a> <span class="preprocessor">#define MAXPULSE 2500</span>
+<a name="l00064"></a>00064 <span class="preprocessor"></span>
+<a name="l00066"></a><a class="code" href="group__jwj__infrared.html#ga3ecb79b8336bbd045b42b9176e3f1123">00066</a> <span class="preprocessor">#define TICK_DURATION 10</span>
+<a name="l00067"></a>00067 <span class="preprocessor"></span>
+<a name="l00069"></a><a class="code" href="group__jwj__infrared.html#ga18d3e58d384a520f164f80a44d5a7e08">00069</a> <span class="preprocessor">#define TIMEOUT_COUNT 200</span>
+<a name="l00070"></a>00070 <span class="preprocessor"></span>
+<a name="l00073"></a><a class="code" href="group__jwj__infrared.html#gad6d455c1130ca455b3cf81f2fb01403f">00073</a> <span class="preprocessor">#define TICK_OCR 0xA0</span>
+<a name="l00074"></a>00074 <span class="preprocessor"></span>
+<a name="l00077"></a><a class="code" href="group__jwj__infrared.html#gadf5a3067e00699dd58fecd3940362917">00077</a> <span class="preprocessor">#define TICK_PRESCALER (1&lt;&lt; CS00)</span>
+<a name="l00078"></a>00078 <span class="preprocessor"></span>
+<a name="l00081"></a><a class="code" href="group__jwj__infrared.html#gab42c336f60f1c807ab3099b7c4d48f64">00081</a> <span class="keyword">typedef</span> <span class="keyword">enum</span> {
+<a name="l00083"></a><a class="code" href="group__jwj__infrared.html#ggab42c336f60f1c807ab3099b7c4d48f64acd8120817dbfbbfe6966830316bf9cc0">00083</a>         <a class="code" href="group__jwj__infrared.html#ggab42c336f60f1c807ab3099b7c4d48f64acd8120817dbfbbfe6966830316bf9cc0">IRError_NoError</a> = 0,
+<a name="l00085"></a><a class="code" href="group__jwj__infrared.html#ggab42c336f60f1c807ab3099b7c4d48f64aa2b590e6d122d91766177002d5349cd9">00085</a>         <a class="code" href="group__jwj__infrared.html#ggab42c336f60f1c807ab3099b7c4d48f64aa2b590e6d122d91766177002d5349cd9">IRError_SigTooLong</a> = 1,
+<a name="l00087"></a><a class="code" href="group__jwj__infrared.html#ggab42c336f60f1c807ab3099b7c4d48f64af25811f4ce086a3a480c186b4b869bbc">00087</a>         <a class="code" href="group__jwj__infrared.html#ggab42c336f60f1c807ab3099b7c4d48f64af25811f4ce086a3a480c186b4b869bbc">IRError_NoSignal</a> = 2,
+<a name="l00089"></a><a class="code" href="group__jwj__infrared.html#ggab42c336f60f1c807ab3099b7c4d48f64af2fb21c7c7064aea4848977e2eeeb604">00089</a>         <a class="code" href="group__jwj__infrared.html#ggab42c336f60f1c807ab3099b7c4d48f64af2fb21c7c7064aea4848977e2eeeb604">IRError_HighPulseTooLong</a> = 3,
+<a name="l00091"></a><a class="code" href="group__jwj__infrared.html#ggab42c336f60f1c807ab3099b7c4d48f64a64c1d57fdfeecdd998cab6b469f2d3ce">00091</a>         <a class="code" href="group__jwj__infrared.html#ggab42c336f60f1c807ab3099b7c4d48f64a64c1d57fdfeecdd998cab6b469f2d3ce">IRError_LowPulseTooLong</a> = 4
+<a name="l00092"></a>00092 } <a class="code" href="group__jwj__infrared.html#gab42c336f60f1c807ab3099b7c4d48f64">IRError</a>;
+<a name="l00093"></a>00093 
+<a name="l00101"></a>00101 <span class="keywordtype">void</span> <a class="code" href="group__jwj__infrared.html#gaa6e4c3e75b86ccd24c9e815d7dd53cfb">sendPulseD</a>( <span class="keywordtype">double</span> highTime, <span class="keywordtype">double</span> lowTime );
+<a name="l00102"></a>00102 
+<a name="l00112"></a>00112 <span class="keywordtype">void</span> <a class="code" href="group__jwj__infrared.html#ga0f861d99f6a01ff6d011c30dd8e15787">sendPulse</a>( uint8_t highTime, uint8_t lowTime );
+<a name="l00113"></a>00113 
+<a name="l00117"></a>00117 <span class="keywordtype">void</span> <a class="code" href="group__jwj__infrared.html#ga607d10b247d3ef3957a029dff92cca1e">sendNECByte</a>( uint8_t data );
+<a name="l00118"></a>00118 
+<a name="l00124"></a>00124 <span class="keywordtype">void</span> <a class="code" href="group__jwj__infrared.html#gaa93d02f9f48cf317a4d2d9410a240c9f">sendNECCommand</a>( uint8_t data );
 <a name="l00125"></a>00125 
-<a name="l00135"></a>00135 uint8_t <a class="code" href="group__jwj__infrared.html#gaef373a4e83a9b5e2de6ad674f8e2bc8e">learnIR</a>( <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> *data );
-<a name="l00138"></a>00138 <span class="preprocessor">#endif</span>
+<a name="l00136"></a>00136 <span class="keywordtype">void</span> <a class="code" href="group__jwj__infrared.html#ga3ef44fa7f9e2694386cefa711bbefa96">sendSequence</a>( <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> *data );
+<a name="l00137"></a>00137 
+<a name="l00141"></a>00141 <span class="keywordtype">void</span> <a class="code" href="group__jwj__infrared.html#ga3fc8699debb6da1fce7cc7c1043484c4">initIR</a>();
+<a name="l00142"></a>00142 
+<a name="l00152"></a>00152 <a class="code" href="group__jwj__infrared.html#gab42c336f60f1c807ab3099b7c4d48f64">IRError</a> <a class="code" href="group__jwj__infrared.html#ga329f8f0f862a6aa59f4f3ecf3675f92e">learnIR</a>( <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> data[] );
+<a name="l00153"></a>00153 
+<a name="l00156"></a>00156 <span class="preprocessor">#endif</span>
 </pre></div></div><!-- contents -->
 </div>
   <div id="nav-path" class="navpath">
     <ul>
       <li class="navelem"><b>infrared.h</b>      </li>
 
-    <li class="footer">Generated on Tue May 8 2012 12:16:47 for BLE IR Remote by
+    <li class="footer">Generated on Wed May 9 2012 23:39:28 for BLE IR Remote by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.0 </li>
    </ul>

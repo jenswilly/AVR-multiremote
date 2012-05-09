@@ -16,7 +16,7 @@
 
  24C EEPROM Library
  
- The 24C EEPROM library contains helper functions for using the 24C (specifically, M24C64) series EEPROMs.
+ The 24C EEPROM library contains helper functions for using the 24C (specifically, Microchip 24LC512) series EEPROMs.
  
 @note
  This library requires I2C functions compatible with <a href="http://jump.to/fleury">Peter Fleury's I2C (TWI) Master Software Library</a>!
@@ -39,11 +39,11 @@ void writeByte( int address, uint8_t data );
 /** Writes a 32 byte page to the specified address.
  @param address The 16 bit memory address to write to.
  @param data Pointer to the data to write.
- @param len Length of data to write. **NOTE: This may not exceed 32 bytes**
+ @param len Length of data to write. **NOTE: This should not exceed 128 bytes or weird stuff will happen**
  
- A page is 32 bytes long. When writing a page, an internal memory address pointer is increased for every byte. But only the last 5 bits are increased. So if the data is longer than 32 bytes or the address is not aligned to the start of a page, the address pointer will wrap around to the start of the page and continue writing.
+ A page is 128 bytes long. When writing a page, an internal memory address pointer is increased for every byte. But only the last 7 bits are increased. So if the data is longer than 128 bytes or the address is not aligned to the start of a page, the address pointer will wrap around to the start of the page and continue writing.
  
- @warning To align the address to the start of a page, the last five bits of the address _must_ be 0. If this is not the case, the address pointer will wrap around to the start of the page and continue so the data written will not be in the same sequence as the original data.
+ @warning To align the address to the start of a page, the last seven bits of the address _must_ be 0. If this is not the case, the address pointer will wrap around to the start of the page and continue so the data written will not be in the same sequence as the original data.
  */
 void writePage( int address, unsigned char *data, uint8_t len );
 
