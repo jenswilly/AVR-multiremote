@@ -23,7 +23,10 @@ enum States
 {
 	State_NOOP,
 	State_Learn,
-	State_Send
+	State_Send,
+	State_Dump,
+	State_SendTestCmd,
+	State_SendTestCmd2
 };
 volatile enum States state = State_NOOP;
 volatile int cmdNumber;
@@ -51,6 +54,7 @@ unsigned char testCmd[] =
 	06, 06, 06, 17, 06, 06, 06, 17, 06, 17, 06, 17, 06, 06, 06, 06, 
 	06, 11, 00
 };
+unsigned char testCmd2[] = {89,44,06,05,05,05,06,16,06,05,05,05,05,05,06,05,06,05,06,16,06,16,06,05,05,16,06,16,06,16,05,16,05,16,06,05,06,05,05,05,06,16,06,05,05,05,05,05,06,05,05,16,05,16,06,16,05,05,05,16,05,16,06,16,06,16,06,00};
 
 unsigned char recordBuffer[128];
 unsigned char EEMEM EECommand[128];
@@ -105,6 +109,22 @@ ISR( USART_RX_vect )
 			// Learn signal
 			state = State_Learn;
 		}
+		else if( usartBuffer[0] == 'D' )
+		{
+			// Write signal to serial
+			state = State_Dump;
+		}
+		else if( usartBuffer[0] == 'T' )
+		{
+			// Write signal to serial
+			state = State_SendTestCmd;
+		}
+		else if( usartBuffer[0] == 'Y' )
+		{
+			// Write signal to serial
+			state = State_SendTestCmd2;
+		}
+		
 
 		// (Unknown commands are ignored)
 		
@@ -189,6 +209,7 @@ void playback()
 int main(void)
 {
 	int cmdLength=0;
+	unsigned char* data;
 	
 	// Setup
 	enable_serial();
@@ -211,7 +232,7 @@ int main(void)
 	
 	// Read command sequence from EEPROM
 	eeprom_read_block( recordBuffer, EECommand, 128 );
-	fprintf( &mystdout, "Read %d bytes from EEPROM:", strlen( (char*)recordBuffer )+1 );
+	fprintf( &mystdout, "Read %d bytes from EEPROM\r\n", strlen( (char*)recordBuffer )+1 );
 
 	// Main loop
 	for( ;; )
@@ -236,10 +257,32 @@ int main(void)
 				else
 				{
 					// Yes, we do: send it
+					PORTB |= (1<< PB0);		
 					fprintf( &mystdout, "Transmitting...\r\n" );
 					sendSequence( recordBuffer );
+					PORTB &= ~(1<< PB0);
 				}
 				break;
+				
+			case State_Dump:
+				fprintf( &mystdout, "Stored code: " );
+				data = recordBuffer;
+				while( *data )
+					fprintf( &mystdout, "%02d-", *data++ );
+				fprintf( &mystdout, "00 <end>\r\n" );
+				break;
+				
+			case State_SendTestCmd:
+				PORTB |= (1<< PB0);		
+				fprintf( &mystdout, "Transmitting hardcoded test command...\r\n" );
+				sendSequence( testCmd );
+				PORTB &= ~(1<< PB0);
+				
+			case State_SendTestCmd2:
+				PORTB |= (1<< PB0);		
+				fprintf( &mystdout, "Transmitting hardcoded test command...\r\n" );
+				sendSequence( testCmd2 );
+				PORTB &= ~(1<< PB0);
 				
 			default:
 				break;

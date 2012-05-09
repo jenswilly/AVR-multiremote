@@ -47,7 +47,7 @@
 #define PRESCALER_FLAGS (1<< CS01)
 
 /** The trim value is a number that is _subtracted_ from the specified time durations in order to compensate for the extra CPU cycles used in control loops etc. This value is really best determined by measuring the on/off times on an oscilloscope and adjusting the value (higher values = shorter durations) until the measured duration matches the specified duration. Nominally, the value is in microseconds. */
-#define TRIM 500
+#define TRIM 300
 
 /** The PINx used for reading the IR input signal. Configure this to match your hardware setup.
  @see IRSENSOR_PIN
