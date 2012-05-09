@@ -93,7 +93,9 @@ ISR( TIMER0_COMPA_vect )
 	}
 }
 
-IRError learnTEST( unsigned char data[] )
+/* Record an IR signal and store it in the specified data buffer
+ */
+IRError learnIR( unsigned char data[] )
 {
 	unsigned int buffer[ 128 ];
 	int i;
@@ -180,104 +182,6 @@ done:
 			data[i+1] = buffer[i+1] * TICK_DURATION / 100;
 		}
 	}
-	return status;
-}
-
-
-/* Record an IR signal and store it in the specified data buffer
- */
-IRError learnIR( unsigned char data[] )
-{
-	IRError status = IRError_NoError;
-	
-	// Initialize Timer0 for the specified sample interval (we're not sending IR codes while we're learning so we might as well use the same timer instead of hogging one more timer).
-	TCCR0B = 0;					// Timer initially stopped
-	OCR0A = TICK_OCR;			// Sample interval
-	TCCR0A = (1<< WGM01);		// WGM mode 2: CTC with OCR0A as TOP
-	TIMSK0 = (1<< OCIE0A);		// Enable OCRA interrupt 
-	sei();
-	
-	// Init
-	pulseDuration = 0;
-	pulseBufPr = 0;
-	pulseOverflow = 0;
-
-	// Start timer
-	TCNT0 = 0;
-	TCCR0B = TICK_PRESCALER;	// Start with specified prescaler
-
-	// Wait for HIGH pulse (=pin LOW) or timeout
-	while( (IRSENSOR_PIN & (1<< IRSENSOR_BIT)) && pulseOverflow < TIMEOUT_COUNT )
-		;
-	
-	// Start pulse duration counter immediately
-	pulseDuration = 0;
-	
-	// Check for timeout
-	if( pulseOverflow >= TIMEOUT_COUNT )
-	{
-		status = IRError_NoSignal;
-		goto quit;
-	}
-	
-	// Reset overflow counter
-	pulseOverflow = 0;
-	
-	while( 1 )
-	{
-		/// DEBUG1: LED on
-		PORTB |= (1<< PB0);
-
-		// Wait for LOW pulse (=pin HIGH) or pulse overflow
-		while( (IRSENSOR_PIN & (1<< IRSENSOR_BIT)) == 0 )
-			;
-		
-		// Store HIGH value
-		data[ pulseBufPr++ ] = pulseDuration * TICK_DURATION / 100;	// Convert from sample interval to 100 µsecs
-		
-		// Restart pulse duration counter
-		pulseDuration = 0;
-		
-		// And now check for overflow
-		if( pulseOverflow > 0 )
-		{
-			// Overflow
-			status = IRError_HighPulseTooLong;
-			fprintf( &mystdout, "Overflow: %d; Duration: %d; BufPtr: %d\n\r", pulseOverflow, pulseDuration, pulseBufPr );
-			goto quit;
-		}
-		
-		/// DEBUG1: LED off
-		PORTB &= ~(1<< PB0);
-
-		// Wait for HIGH pulse (=pin LOW) or pulse overflow
-		while( (IRSENSOR_PIN & (1<< IRSENSOR_BIT))  )
-			;
-		
-		// Store LOW value
-		data[ pulseBufPr++ ] = pulseDuration * TICK_DURATION / 100;	// Convert from sample interval to 100 µsecs
-		
-		// Restart pulse duration counter
-		pulseDuration = 0;
-		
-		// And check for overflow
-		if( pulseOverflow > 0 )
-		{
-			// Overflow when LOW is simply interpreted as "signal ended"
-			break;
-		}
-	}
-	
-	// Replace last LOW value with 0x00 to terminate
-	data[ pulseBufPr-1 ] = 0;
-	
-quit:
-	// Re-initialize Timer0 for IR PWM
-	initIR();
-	
-	/// DEBUG2
-	PORTB &= ~(1<< PB0);
-	
 	return status;
 }
 

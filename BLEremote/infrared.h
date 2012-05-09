@@ -151,8 +151,6 @@ void initIR();
  */ 
 IRError learnIR( unsigned char data[] );
 
-IRError learnTEST( unsigned char data[] );
-
 /**@}*/
 
 #endif
