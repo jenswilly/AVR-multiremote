@@ -16,8 +16,6 @@
 #include <avr/interrupt.h>
 #include "infrared.h"
 
-#define MODE 3	// 1=record, 2=play back, 3=auto
-
 // FSM states
 enum States
 {
@@ -29,7 +27,8 @@ enum States
 	State_SendTestCmd2
 };
 volatile enum States state = State_NOOP;
-volatile int cmdNumber;
+volatile uint8_t nextCommand = 0;
+uint8_t currentCommand = 0;
 
 /* Precompiler stuff for calculating USART baud rate value 
  * Otherwise, use this page: http://www.wormfood.net/avrbaudcalc.php?postbitrate=9600&postclock=12&bit_rate_table=on
@@ -57,7 +56,10 @@ unsigned char testCmd[] =
 unsigned char testCmd2[] = {89,44,06,05,05,05,06,16,06,05,05,05,05,05,06,05,06,05,06,16,06,16,06,05,05,16,06,16,06,16,05,16,05,16,06,05,06,05,05,05,06,16,06,05,05,05,05,05,06,05,05,16,05,16,06,16,05,05,05,16,05,16,06,16,06,16,06,00};
 
 unsigned char recordBuffer[128];
-unsigned char EEMEM EECommand[128];
+unsigned char EEMEM EECommand1[128];
+unsigned char EEMEM EECommand2[128];
+unsigned char EEMEM EECommand3[128];
+unsigned char EEMEM EECommand4[128];
 unsigned int EEMEM EEcmdLength;
 unsigned int i;
 
@@ -99,6 +101,10 @@ ISR( USART_RX_vect )
 	// Check for "terminate command" byte (0x0A, \n, LF)
 	if( usartBuffer[ usartBufPtr-1 ] == 0x0A )
 	{
+		// Parse command number
+		// NOTE: This *may* result in an outdated or garbage value if no command number has been sent (e.g. for 'T' and 'Y' commands).
+		nextCommand = (usartBuffer[2] - '0')*100 + (usartBuffer[3] - '0')*10 + (usartBuffer[4] - '0');
+		
 		if( usartBuffer[0] == 'S' )
 		{
 			// Send command
@@ -133,6 +139,23 @@ ISR( USART_RX_vect )
 	}
 }
 
+static inline void* addressForCommand( uint8_t commandNumber )
+{
+	/// TEMP – should be a simple calculation instead
+	if( commandNumber == 1 )
+		return EECommand1;
+	else if( commandNumber == 2 )
+		return EECommand2;
+	else if( commandNumber == 3 )
+		return EECommand3;
+	else if( commandNumber == 4 )
+		return EECommand4;
+	
+	/// TODO: no error handling or check for in-range command numbers...
+	else
+		return 0;
+}
+
 void learn()
 {
 	IRError status;
@@ -156,7 +179,7 @@ void learn()
 		fprintf( &mystdout, "Error: %d\n\r", status );
 		
 		// Restore saved code
-		eeprom_read_block( recordBuffer, EECommand, 128 );
+		eeprom_read_block( recordBuffer, addressForCommand( currentCommand ), 128 );
 		fprintf( &mystdout, "Restored %d byte sequence from EEPROM:", strlen( (char*)recordBuffer )+1 );
 	}
 	else
@@ -170,45 +193,17 @@ void learn()
 		
 		// Store command in EEPROM
 		i = strlen( (char*)recordBuffer )+1;
-		fprintf( &mystdout, "Storing %d bytes in EEPROM\r\n", i );
+		fprintf( &mystdout, "Storing %d bytes in EEPROM at address %p\r\n", i, addressForCommand( nextCommand ));
 		eeprom_busy_wait();
 		eeprom_write_word( &EEcmdLength, i );
 		
 		eeprom_busy_wait();
-		eeprom_write_block( recordBuffer, EECommand, i+1 );
-	}
-}
-
-void playback()
-{
-	unsigned char *data;
-
-	fprintf( &mystdout, "Ready to play back...\n\r" );
-	
-	// Read command from eeprom
-	eeprom_busy_wait();
-	eeprom_read_block( recordBuffer, EECommand, 128 );
-	fprintf( &mystdout, "Read %d bytes from EEPROM:", strlen( (char*)recordBuffer )+1 );
-	data = recordBuffer;
-	
-	for( i=0; *data && i<128; i++, data++ )
-		fprintf( &mystdout, "%02d-", *data++ );
-	fprintf( &mystdout, "00 <end>\r\n" );
-	// Main loop
-	for( ;; )
-	{
-		// Send sequence
-		fprintf( &mystdout, "Transmitting...\r\n" );
-		sendSequence( recordBuffer );
-		
-		// Wait
-		_delay_ms( 3000 );
+		eeprom_write_block( recordBuffer, addressForCommand( nextCommand ), i+1 );
 	}
 }
 
 int main(void)
 {
-	int cmdLength=0;
 	unsigned char* data;
 	
 	// Setup
@@ -216,23 +211,13 @@ int main(void)
 	sei();
 	DDRB |= (1<< PB0);	// PB0 -> output for debugging LED
 
+	// Zero the USART buffer
+	memset( usartBuffer, '0', RX_BUF_SIZE );
+	
 	// Init IR
 	initIR();
 		
-#if MODE == 1
-	learn();
-#elif MODE == 2
-	playback();
-#elif MODE == 3
 	fprintf( &mystdout, "BLE command mode\n\r" );
-
-	// Start by reading command length from EEPROM
-	cmdLength = eeprom_read_word( &EEcmdLength );
-	fprintf( &mystdout, "Command length in EEPROM is: %d\r\n", cmdLength );
-	
-	// Read command sequence from EEPROM
-	eeprom_read_block( recordBuffer, EECommand, 128 );
-	fprintf( &mystdout, "Read %d bytes from EEPROM\r\n", strlen( (char*)recordBuffer )+1 );
 
 	// Main loop
 	for( ;; )
@@ -250,7 +235,18 @@ int main(void)
 				break;
 				
 			case State_Send:
-				// Send sequence: do we have a sequence loaded?
+				// Send sequence: have we already loaded the specified command?
+				if( currentCommand != nextCommand )
+				{
+					// No: load it from EEPROM into SRAM first
+					eeprom_read_block( recordBuffer, addressForCommand( nextCommand ), 128 );
+					fprintf( &mystdout, "Read %d bytes from EEPROM at address %p for command %d\r\n", strlen( (char*)recordBuffer )+1, addressForCommand( nextCommand ), nextCommand );
+					
+					// We now have correct command loaded
+					currentCommand = nextCommand;
+				}
+				
+				// Do we have valid data for the specified command?
 				if( recordBuffer[0] == 0xFF )
 					// No, we don't
 					fprintf( &mystdout, "No IR code stored – not transmitting.\r\n" );
@@ -291,8 +287,6 @@ int main(void)
 		// Go to idle state
 		state = State_NOOP;
 	}
-#endif
-
 
     return 0;
 }
