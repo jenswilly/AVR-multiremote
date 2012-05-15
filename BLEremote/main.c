@@ -15,6 +15,8 @@
 #include <avr/eeprom.h>
 #include <avr/interrupt.h>
 #include "infrared.h"
+#include "24c_eeprom.h"
+#include "i2cmaster.h"
 
 // FSM states
 enum States
@@ -24,7 +26,8 @@ enum States
 	State_Send,
 	State_Dump,
 	State_SendTestCmd,
-	State_SendTestCmd2
+	State_SendTestCmd2,
+	State_DidConnect
 };
 volatile enum States state = State_NOOP;
 volatile uint8_t nextCommand = 0;
@@ -44,23 +47,7 @@ volatile unsigned char usartBufPtr=0;		// USART buffer pointer
 static int uart_putchar( char c, FILE *stream );
 FILE mystdout = FDEV_SETUP_STREAM( uart_putchar, NULL, _FDEV_SETUP_WRITE );
 
-unsigned char testCmd[] = 
-{
-	90, 45,
-	06, 06, 06, 06, 06, 17, 06, 06, 06, 06, 06, 06, 06, 06, 06, 06,
-	06, 17, 06, 17, 06, 06, 06, 17, 06, 17, 06, 17, 06, 17, 06, 17,
-	06, 17, 06, 06, 06, 17, 06, 06, 06, 06, 06, 06, 06, 17, 06, 17,
-	06, 06, 06, 17, 06, 06, 06, 17, 06, 17, 06, 17, 06, 06, 06, 06, 
-	06, 11, 00
-};
-unsigned char testCmd2[] = {89,44,06,05,05,05,06,16,06,05,05,05,05,05,06,05,06,05,06,16,06,16,06,05,05,16,06,16,06,16,05,16,05,16,06,05,06,05,05,05,06,16,06,05,05,05,05,05,06,05,05,16,05,16,06,16,05,05,05,16,05,16,06,16,06,16,06,00};
-
 unsigned char recordBuffer[128];
-unsigned char EEMEM EECommand1[128];
-unsigned char EEMEM EECommand2[128];
-unsigned char EEMEM EECommand3[128];
-unsigned char EEMEM EECommand4[128];
-unsigned int EEMEM EEcmdLength;
 unsigned int i;
 
 // Enables USART comm
@@ -130,6 +117,11 @@ ISR( USART_RX_vect )
 			// Write signal to serial
 			state = State_SendTestCmd2;
 		}
+		else if( usartBuffer[0] == 'C' )
+		{
+			// Connected
+			state = State_DidConnect;
+		}
 		
 
 		// (Unknown commands are ignored)
@@ -139,21 +131,9 @@ ISR( USART_RX_vect )
 	}
 }
 
-static inline void* addressForCommand( uint8_t commandNumber )
+static inline int addressForCommand( uint8_t commandNumber )
 {
-	/// TEMP – should be a simple calculation instead
-	if( commandNumber == 1 )
-		return EECommand1;
-	else if( commandNumber == 2 )
-		return EECommand2;
-	else if( commandNumber == 3 )
-		return EECommand3;
-	else if( commandNumber == 4 )
-		return EECommand4;
-	
-	/// TODO: no error handling or check for in-range command numbers...
-	else
-		return 0;
+	return commandNumber * 128;	// EEPROM address is simple page size times command index
 }
 
 void learn()
@@ -179,7 +159,7 @@ void learn()
 		fprintf( &mystdout, "Error: %d\n\r", status );
 		
 		// Restore saved code
-		eeprom_read_block( recordBuffer, addressForCommand( currentCommand ), 128 );
+		readData( addressForCommand( currentCommand ), recordBuffer, 128 );
 		fprintf( &mystdout, "Restored %d byte sequence from EEPROM:", strlen( (char*)recordBuffer )+1 );
 	}
 	else
@@ -193,12 +173,9 @@ void learn()
 		
 		// Store command in EEPROM
 		i = strlen( (char*)recordBuffer )+1;
-		fprintf( &mystdout, "Storing %d bytes in EEPROM at address %p\r\n", i, addressForCommand( nextCommand ));
-		eeprom_busy_wait();
-		eeprom_write_word( &EEcmdLength, i );
-		
-		eeprom_busy_wait();
-		eeprom_write_block( recordBuffer, addressForCommand( nextCommand ), i+1 );
+		fprintf( &mystdout, "Storing %d bytes in EEPROM at address %d... ", i, addressForCommand( nextCommand ));
+		writePage( addressForCommand( nextCommand ), recordBuffer, i+1 );
+		fprintf( &mystdout, "Done.\r\n" );
 	}
 }
 
@@ -208,9 +185,11 @@ int main(void)
 	
 	// Setup
 	enable_serial();
+	i2c_init();
 	sei();
 	DDRB |= (1<< PB0);	// PB0 -> output for debugging LED
-
+	DDRD |= (1<< PD5);	// OC0B/PD5 -> output
+	
 	// Zero the USART buffer
 	memset( usartBuffer, '0', RX_BUF_SIZE );
 	
@@ -239,8 +218,8 @@ int main(void)
 				if( currentCommand != nextCommand )
 				{
 					// No: load it from EEPROM into SRAM first
-					eeprom_read_block( recordBuffer, addressForCommand( nextCommand ), 128 );
-					fprintf( &mystdout, "Read %d bytes from EEPROM at address %p for command %d\r\n", strlen( (char*)recordBuffer )+1, addressForCommand( nextCommand ), nextCommand );
+					readData( addressForCommand( nextCommand ), recordBuffer, 128 );
+					fprintf( &mystdout, "Read %d bytes from EEPROM at address %d for command %d\r\n", strlen( (char*)recordBuffer )+1, addressForCommand( nextCommand ), nextCommand );
 					
 					// We now have correct command loaded
 					currentCommand = nextCommand;
@@ -256,6 +235,10 @@ int main(void)
 					PORTB |= (1<< PB0);		
 					fprintf( &mystdout, "Transmitting...\r\n" );
 					sendSequence( recordBuffer );
+					
+					// Wait a bit and send it again
+					_delay_ms( 30 );
+					sendSequence( recordBuffer );
 					PORTB &= ~(1<< PB0);
 				}
 				break;
@@ -268,17 +251,10 @@ int main(void)
 				fprintf( &mystdout, "00 <end>\r\n" );
 				break;
 				
-			case State_SendTestCmd:
-				PORTB |= (1<< PB0);		
-				fprintf( &mystdout, "Transmitting hardcoded test command...\r\n" );
-				sendSequence( testCmd );
-				PORTB &= ~(1<< PB0);
-				
-			case State_SendTestCmd2:
-				PORTB |= (1<< PB0);		
-				fprintf( &mystdout, "Transmitting hardcoded test command...\r\n" );
-				sendSequence( testCmd2 );
-				PORTB &= ~(1<< PB0);
+			case State_DidConnect:
+				// Toggle full-power IR LED for power measurements
+				// PIND |= (1<< PD5);
+				break;
 				
 			default:
 				break;
