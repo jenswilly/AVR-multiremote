@@ -39,6 +39,7 @@ uint8_t currentCommand = 0;
 //#define USART_BAUDRATE 2400	// error 0.2% for 1.5 MHz
 #define USART_BAUDRATE 9600	// error 0.2%
 #define BAUD_PRESCALE (((F_CPU / (USART_BAUDRATE * 16UL))) - 1) 
+
 #define RX_BUF_SIZE	20
 unsigned char usartBuffer[RX_BUF_SIZE];		// USART receive buffer
 volatile unsigned char usartBufPtr=0;		// USART buffer pointer
@@ -47,7 +48,7 @@ volatile unsigned char usartBufPtr=0;		// USART buffer pointer
 static int uart_putchar( char c, FILE *stream );
 FILE mystdout = FDEV_SETUP_STREAM( uart_putchar, NULL, _FDEV_SETUP_WRITE );
 
-unsigned char recordBuffer[128];
+unsigned char recordBuffer[256];
 unsigned int i;
 
 // Enables USART comm
@@ -133,16 +134,17 @@ ISR( USART_RX_vect )
 
 static inline int addressForCommand( uint8_t commandNumber )
 {
-	return commandNumber * 128;	// EEPROM address is simple page size times command index
+	return commandNumber * 2 * 128;	// EEPROM address is simple page size times command index times two (since each command takes up
 }
 
 void learn()
 {
 	IRError status;
-	unsigned char *data;
+	unsigned int *data;
+	unsigned int i;
 
 	// Clear the memory buffer
-	memset( recordBuffer, 0x00, 128 );
+	memset( recordBuffer, 0x00, 256 );
 
 	fprintf( &mystdout, "Ready to record...\n\r" );
 			
@@ -159,24 +161,40 @@ void learn()
 		fprintf( &mystdout, "Error: %d\n\r", status );
 		
 		// Restore saved code
-		readData( addressForCommand( currentCommand ), recordBuffer, 128 );
-		fprintf( &mystdout, "Restored %d byte sequence from EEPROM:", strlen( (char*)recordBuffer )+1 );
+		readData( addressForCommand( currentCommand ), recordBuffer, 256 );
+		fprintf( &mystdout, "Restored byte sequence from EEPROM" );
 	}
 	else
 	{
 		// No error: print data
 		fprintf( &mystdout, "Read code: " );
-		data = recordBuffer;
+		data = (unsigned int*)recordBuffer;
+		i=0;
 		while( *data )
-			fprintf( &mystdout, "%02d-", *data++ );
+		{
+			fprintf( &mystdout, "%04x-", *data++ );
+			fprintf( &mystdout, "%04x ", *data++ );
+			i += 2;
+		}
 		fprintf( &mystdout, "00 <end>\r\n" );
 		
 		// Store command in EEPROM
-		i = strlen( (char*)recordBuffer )+1;
 		fprintf( &mystdout, "Storing %d bytes in EEPROM at address %d... ", i, addressForCommand( nextCommand ));
-		writePage( addressForCommand( nextCommand ), recordBuffer, i+1 );
+		writePage( addressForCommand( nextCommand ), recordBuffer, 128 );		// First page
+		writePage( addressForCommand( nextCommand )+128	, recordBuffer+128, 128 );	// Second page
 		fprintf( &mystdout, "Done.\r\n" );
 	}
+}
+
+int commandLength( unsigned char *ptr )
+{
+	unsigned int *data = (unsigned int*)ptr;
+	unsigned int i=0;
+	
+	while( *data++ )
+		i++;
+	
+	return i;
 }
 
 int main(void)
@@ -218,8 +236,8 @@ int main(void)
 				if( currentCommand != nextCommand )
 				{
 					// No: load it from EEPROM into SRAM first
-					readData( addressForCommand( nextCommand ), recordBuffer, 128 );
-					fprintf( &mystdout, "Read %d bytes from EEPROM at address %d for command %d\r\n", strlen( (char*)recordBuffer )+1, addressForCommand( nextCommand ), nextCommand );
+					readData( addressForCommand( nextCommand ), recordBuffer, 256 );
+					fprintf( &mystdout, "Read %d pairs from EEPROM at address %d for command %d\r\n", commandLength( recordBuffer ), addressForCommand( nextCommand ), nextCommand );
 					
 					// We now have correct command loaded
 					currentCommand = nextCommand;
@@ -234,11 +252,11 @@ int main(void)
 					// Yes, we do: send it
 					PORTB |= (1<< PB0);		
 					fprintf( &mystdout, "Transmitting...\r\n" );
-					sendSequence( recordBuffer );
+					sendSequence2( recordBuffer );
 					
 					// Wait a bit and send it again
-					_delay_ms( 30 );
-					sendSequence( recordBuffer );
+					_delay_ms( 10 );
+					sendSequence2( recordBuffer );
 					PORTB &= ~(1<< PB0);
 				}
 				break;

@@ -19,6 +19,8 @@ volatile unsigned int pulseDuration;
 volatile unsigned int pulseBufPr;
 volatile unsigned int pulseOverflow;
 
+unsigned int* pulseBuffer;
+
 /* Sends a high-low pulse
  * Specify times for high duration and low duration in ms
  */
@@ -55,14 +57,51 @@ void sendNECCommand( uint8_t data )
 	sendNECByte( ~data );
 }
 
-/* Sends a pulse specified as 0.1 ms durations
+/* JVC commands consist of a 8.4 - 4.2 ms lead-in followed by one address byte (LSB) and one command byte (LSB).
+ * Logical 1 is 0.56 - 1.54 ms
+ * Logical 0 is 0.56 - 0.49 ms
+ *
+ * Protocol description: http://www.sbprojects.com/knowledge/ir/jvc.php
+ * Rotel DVD remote codes can be found here: http://www.remotecentral.com/cgi-bin/codes/rotel/rdv-1080/
+ * Commands are specified as 0000 (learned) 006d (38 kHz) 0001 (one seq 1 pair) 0011 (17 seq 2 pairs – last is lead out)
+ *  followed by 013e 009e (lead-in) and 0014 003c (logical 1) and 0014 0014 (logical 0).
  */
-void sendPulse( uint8_t highTime, uint8_t lowTime )
+void sendJVCByte( uint8_t data )
+{
+	
+}
+
+/* Sends a pulse specified as 0.01 ms durations
+ */
+void sendPulse( unsigned int highTime, unsigned int lowTime )
 {
 	IR_HIGH;
-	_delay_us( highTime * 100 - TRIM );
+	_delay_us( highTime * TICK_DURATION - TRIM );
 	IR_LOW;
-	_delay_us( lowTime * 100 - TRIM );
+	_delay_us( lowTime * TICK_DURATION - TRIM );
+}
+
+/* Timer-based method for sending a command sequence.
+ * TIMER1 is set up in CTC mode with the same period as when learning IR codes.
+ * pulseDuration is set to the learned values and decreased on every compare match interrupt.
+ * When pulseDuration is at zero, the IR signal is toggled and the data pointer is increased to next value.
+ * If the pointer points to zero, the IR is set low and the timer stopped.
+ */
+void sendSequence2( unsigned char *data )
+{
+	// Point to sequence data
+	pulseBuffer = (unsigned int*)data;	// Typecast to int* so increments work
+	
+	// Configure TIMER1 with the same sample interval as when learning.
+	OCR1A = TICK_OCR;						// Use same period as the sampling interval
+	TCCR1B = (1<< WGM12) | TICK_PRESCALER1;	// WGM mode 4: CTC w/ OCR1A as TOP and prescaler to match sampling interval period
+	TIMSK1 = (1<< OCIE1A);					// Enable output compare A match interrupt
+	
+	// IR high for the first value
+	IR_HIGH;
+	
+	// Set pulseDuration to first value
+	pulseDuration = *pulseBuffer++;
 }
 
 /* Sends a complete data sequence.
@@ -71,10 +110,36 @@ void sendPulse( uint8_t highTime, uint8_t lowTime )
  */
 void sendSequence( unsigned char *data )
 {
+	unsigned int *ptr = (unsigned int*)data;	// Typecast to int* so increments work correctly
+	
 	// Terminate when data = 0
-	for( ; *data != 0; data += 2 )
+	for( ; *ptr != 0; ptr += 2 )
 	{
-		sendPulse( *data, *(data+1) );
+		sendPulse( *ptr, *(ptr+1) );
+	}
+}
+
+/* Timer1 Compare Match interrupt handler
+ */
+ISR( TIMER1_COMPA_vect )
+{
+	// Are we at end of sequence?
+	if( *pulseBuffer == 0 )
+	{
+		// Yes: IR low
+		IR_LOW;
+		
+		// Stop timer
+		TCCR1B = 0;
+	}
+	
+	// No: decrease counter and toggle IR if we're at zero
+	if( --pulseDuration == 0 )
+	{
+		IR_TOGGLE;
+	
+		// Set new duration. Duration is specified in TICK_DURATION periods.
+		pulseDuration = *pulseBuffer++;
 	}
 }
 
@@ -95,10 +160,9 @@ ISR( TIMER0_COMPA_vect )
 
 /* Record an IR signal and store it in the specified data buffer
  */
-IRError learnIR( unsigned char data[] )
+IRError learnIR( unsigned char *data )
 {
-	unsigned int buffer[ 128 ];
-	int i;
+	unsigned int *ptr = (unsigned int*)data;	// Typecast to unsigned int*
 	
 	IRError status = IRError_NoError;
 	
@@ -106,10 +170,10 @@ IRError learnIR( unsigned char data[] )
 	DDRB |= (1<< PB1);	// PB1/OC1A -> output
 	
 	// Initialize Timer0 for the specified sample interval (we're not sending IR codes while we're learning so we might as well use the same timer instead of hogging one more timer).
-	TCCR0A = (1<< WGM01);	// CTC mode
-	TCCR0B = (1<< CS00);	// Start with prescaler 1
-	OCR0A = TICK_OCR;		// Sample interval
-	TIMSK0 = (1<< OCIE0A);	// Enable OCRA interrupt 
+	TCCR0A = (1<< WGM01);		// CTC mode
+	TCCR0B = TICK_PRESCALER;	// Start with prescaler 1
+	OCR0A = TICK_OCR;			// Sample interval
+	TIMSK0 = (1<< OCIE0A);		// Enable OCRA interrupt 
 	sei();
 	
 	// Init
@@ -146,7 +210,7 @@ IRError learnIR( unsigned char data[] )
 		}
 
 		// Store HIGH value
-		buffer[ pulseBufPr++ ] = pulseDuration;
+		ptr[ pulseBufPr++ ] = pulseDuration;
 		
 		// Wait for HIGH pulse (=pin LOW) or pulse overflow
 		cli();
@@ -163,25 +227,16 @@ IRError learnIR( unsigned char data[] )
 		}
 		
 		// Store LOW value
-		buffer[ pulseBufPr++ ] = pulseDuration;
+		ptr[ pulseBufPr++ ] = pulseDuration;
 	}
 	
 	// Terminate with 0
-	data[ pulseBufPr ] = 0;
+	ptr[ pulseBufPr ] = 0;
 
 done:
+	// Re-initialize for IR sending
 	initIR();
-	
-	// Did we get some data?
-	if( pulseBufPr > 0 )
-	{
-		// Yes: convert it from raw sample times to .1 ms intervals
-		for( i=0; i<pulseBufPr; i += 2 )
-		{
-			data[i] = buffer[i] * TICK_DURATION / 100;
-			data[i+1] = buffer[i+1] * TICK_DURATION / 100;
-		}
-	}
+
 	return status;
 }
 

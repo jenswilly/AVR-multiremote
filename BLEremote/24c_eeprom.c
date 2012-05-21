@@ -64,7 +64,7 @@ void readData( int address, unsigned char *data, int len )
 	i2c_stop();
 }
 
-/* Write up to 128 bytes. NB: heed warnings about adderss alignment and data size. */
+/* Write up to 256 bytes. NB: heed warnings about adderss alignment and data size. */
 void writePage( int address, unsigned char *data, uint8_t len )
 {
 	int i;

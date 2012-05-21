@@ -31,11 +31,14 @@
 
 /**@{*/
 
-/** Macros for switching PWM output on – i.e. setting the IR pulse _high_. */
+/** Macro for switching PWM output on – i.e. setting the IR pulse _high_. */
 #define IR_HIGH TCCR0A |= (1<< COM0B1)
 
-/** Macros for switching PWM output off – i.e. setting the IR pulse _low_. */
+/** Macro for switching PWM output off – i.e. setting the IR pulse _low_. */
 #define IR_LOW TCCR0A &= ~(1<< COM0B1)
+
+/** Macro for toggeling PWM output. */
+#define IR_TOGGLE TCCR0A ^= (1<< COM0B1)
 
 /** Sets the TOP value for the 8 bit Timer0 for a PWM frequency of 38 kHz (or as close as possible. Values can be calculated here: http://www.et06.dk/atmega_timers/ */
 #define OCR0A_VALUE 53
@@ -47,7 +50,7 @@
 #define PRESCALER_FLAGS (1<< CS01)
 
 /** The trim value is a number that is _subtracted_ from the specified time durations in order to compensate for the extra CPU cycles used in control loops etc. This value is really best determined by measuring the on/off times on an oscilloscope and adjusting the value (higher values = shorter durations) until the measured duration matches the specified duration. Nominally, the value is in microseconds. */
-#define TRIM 450
+#define TRIM 400
 
 /** The PINx used for reading the IR input signal. Configure this to match your hardware setup.
  @see IRSENSOR_PIN
@@ -76,12 +79,16 @@
  */
 #define TICK_PRESCALER (1<< CS00)
 
+/** Prescaler for TIMER1. TICK_OCR is used both for TIMER0 (when learning) and TIMER1 (when sending).
+ */
+#define TICK_PRESCALER1 (1<< CS10)
+
 /** Error codes for the learnIR() function
  */
 typedef enum {
 	/** No error - operation suceeded */
 	IRError_NoError = 0,
-	/** The signal length exceeds 64 byte pairs and so cannot fit in the 128 byte data buffer */
+	/** The signal length exceeds 64 byte pairs and so cannot fit in the 256 byte data buffer */
 	IRError_SigTooLong = 1,
 	/** No signal was detected */
 	IRError_NoSignal = 2,
@@ -109,7 +116,7 @@ void sendPulseD( double highTime, double lowTime );
  
  @see sendPulseD
  */
-void sendPulse( uint8_t highTime, uint8_t lowTime );
+void sendPulse( unsigned int highTime, unsigned int lowTime );
 
 /** Sends a NEC1 byte.
  @deprecated Not up-to-date: timing has been manually trimmed.
@@ -135,6 +142,8 @@ void sendNECCommand( uint8_t data );
  */
 void sendSequence( unsigned char *data );
 
+void sendSequence2( unsigned char *data );
+
 /** Initializes Timer0 for 38 kHz PWM.
  @note Pin OC0B (PD5) is configured as output and used for the PWM signal.
  */
@@ -149,7 +158,7 @@ void initIR();
  @return 0 if a valid signal was recorded. Otherwise a @link IRError @endlink value is returned.
  @retval 0 A valid signal was recorded and stored in the data buffer.
  */ 
-IRError learnIR( unsigned char data[] );
+IRError learnIR( unsigned char *data );
 
 /**@}*/
 
