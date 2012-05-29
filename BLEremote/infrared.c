@@ -120,11 +120,12 @@ void sendSequence( unsigned char *data )
 }
 
 /* Timer1 Compare Match interrupt handler
+ * This is used when sending commands.
  */
 ISR( TIMER1_COMPA_vect )
 {
 	// No: decrease counter and toggle IR if we're at zero
-	if( --pulseDuration == 1 )
+	if( --pulseDuration == 0 )
 	{
 		IR_TOGGLE;
 	
@@ -140,6 +141,7 @@ ISR( TIMER1_COMPA_vect )
 			// Stop timer
 			TCCR1B = 0;
 		}
+		pulseDuration++;	// Increase pulse duration by one
 	}
 }
 
