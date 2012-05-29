@@ -15,7 +15,7 @@
 # FUSES ........ Parameters for avrdude to flash the fuses appropriately.
 
 DEVICE     = atmega328p
-CLOCK      = 16000000
+CLOCK      = 12000000
 PROGRAMMER = -c avrispmkII -P usb
 OBJECTS    = main.o i2cmaster.o 24c_eeprom.o infrared.o
 FUSES      = -U lfuse:w:0xf7:m -U hfuse:w:0xd9:m -U efuse:w:0x07:m	# ext. full-swing xtal; slow startup

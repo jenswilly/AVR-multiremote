@@ -41,16 +41,16 @@
 #define IR_TOGGLE TCCR0A ^= (1<< COM0B1)
 
 /** Sets the TOP value for the 8 bit Timer0 for a PWM frequency of 38 kHz (or as close as possible. Values can be calculated here: http://www.et06.dk/atmega_timers/ */
-#define OCR0A_VALUE 53
+#define OCR0A_VALUE 39
 
 /** Sets the OCR value for duty cycle. This should be about 1/3 of the OCR0A value. */
-#define OCR0B_VALUE 18
+#define OCR0B_VALUE 13
 
 /** Define the prescaler flags to match the OCR0A value for a PWM frequency of 38 kHz. Values can be calculated here: http://www.et06.dk/atmega_timers/ */
 #define PRESCALER_FLAGS (1<< CS01)
 
-/** The trim value is a number that is _subtracted_ from the specified time durations in order to compensate for the extra CPU cycles used in control loops etc. This value is really best determined by measuring the on/off times on an oscilloscope and adjusting the value (higher values = shorter durations) until the measured duration matches the specified duration. Nominally, the value is in microseconds. */
-#define TRIM 400
+/** The trim value is a number that is _subtracted_ from the specified time durations in order to compensate for the extra CPU cycles used in control loops etc. This value is really best determined by measuring the on/off times on an oscilloscope and adjusting the value (higher values = shorter durations) until the measured duration matches the specified duration. */
+#define TRIM 0
 
 /** The PINx used for reading the IR input signal. Configure this to match your hardware setup.
  @see IRSENSOR_PIN
@@ -63,17 +63,17 @@
 #define IRSENSOR_BIT PB2
 
 /** Maximum number of ticks (one tick equals TICK_DURATION µs for either a HIGH or LOW pulse. */
-#define MAXPULSE 2500
+#define MAXPULSE 5000
 
 /** Sample period length in microseconds. At every tick the IR input signal is sampled. This must correspond to the @link TICK_OCR @endlink value. */
-#define TICK_DURATION 10
+#define TICK_DURATION 5
 
 /** Number of MAXPULSE durations allowed until timeout occurs. This is used when waiting for the initial signal. If a time equal to TIMEOUT_COUNT * MAXPULSE * TICK_DURATION microseconds passes, a timeout occurs. */
-#define TIMEOUT_COUNT 200
+#define TIMEOUT_COUNT 400
 
 /** Output compare value for the 8 bit Timer0 to match the TICK_DURATION. Values can be calculated here: http://www.et06.dk/atmega_timers/
  */
-#define TICK_OCR 0xA0
+#define TICK_OCR 0x3C
 
 /** Prescaler for the TICK_OCR value to match the TICK_DURATION.
  */

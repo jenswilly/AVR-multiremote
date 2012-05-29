@@ -199,7 +199,8 @@ int commandLength( unsigned char *ptr )
 
 int main(void)
 {
-	unsigned char* data;
+	unsigned int* data;
+	int i;
 	
 	// Setup
 	enable_serial();
@@ -255,17 +256,22 @@ int main(void)
 					sendSequence2( recordBuffer );
 					
 					// Wait a bit and send it again
-					_delay_ms( 10 );
-					sendSequence2( recordBuffer );
+//					_delay_ms( 10 );
+//					sendSequence2( recordBuffer );
 					PORTB &= ~(1<< PB0);
 				}
 				break;
 				
 			case State_Dump:
-				fprintf( &mystdout, "Stored code: " );
-				data = recordBuffer;
+				fprintf( &mystdout, "Stored code:\r\n" );
+				data = (unsigned int*)recordBuffer;
+				i=0;
 				while( *data )
-					fprintf( &mystdout, "%02d-", *data++ );
+				{
+					fprintf( &mystdout, "%04x-", *data++ );
+					fprintf( &mystdout, "%04x ", *data++ );
+					i += 2;
+				}
 				fprintf( &mystdout, "00 <end>\r\n" );
 				break;
 				

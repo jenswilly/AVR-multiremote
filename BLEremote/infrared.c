@@ -123,23 +123,23 @@ void sendSequence( unsigned char *data )
  */
 ISR( TIMER1_COMPA_vect )
 {
-	// Are we at end of sequence?
-	if( *pulseBuffer == 0 )
-	{
-		// Yes: IR low
-		IR_LOW;
-		
-		// Stop timer
-		TCCR1B = 0;
-	}
-	
 	// No: decrease counter and toggle IR if we're at zero
-	if( --pulseDuration == 0 )
+	if( --pulseDuration == 1 )
 	{
 		IR_TOGGLE;
 	
 		// Set new duration. Duration is specified in TICK_DURATION periods.
 		pulseDuration = *pulseBuffer++;
+
+		// Are we at end of sequence?
+		if( pulseDuration == 0 )
+		{
+			// Yes: IR low
+			IR_LOW;
+			
+			// Stop timer
+			TCCR1B = 0;
+		}
 	}
 }
 
