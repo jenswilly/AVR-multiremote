@@ -18,6 +18,19 @@
 #include "24c_eeprom.h"
 #include "i2cmaster.h"
 
+#define RED_ON		PORTB |= (1<< PB1); PORTB &= ~(1<< PB0);
+#define GREEN_ON	PORTB |= (1<< PB0); PORTB &= ~(1<< PB1);
+#define YELLOW_ON	PORTB |= (1<< PB0) | (1<< PB1);	
+#define ALL_OFF		PORTB &= ~(1<< PB0) & ~(1<< PB1);
+
+_delay_ms( 200 );
+		// YELLOW
+_delay_ms( 200 );
+		// GREEN
+_delay_ms( 200 );
+		// off
+
+
 // FSM states
 enum States
 {
@@ -151,9 +164,9 @@ void learn()
 	// Read IR sequence
 	fprintf( &mystdout, "LEARN\r\n" );
 	
-	PORTB |= (1<< PB0);		
+	YELLOW_ON;	
 	status = learnIR( recordBuffer );
-	PORTB &= ~(1<< PB0);
+	ALL_OFF;
 	
 	if( status != IRError_NoError )
 	{
@@ -163,6 +176,11 @@ void learn()
 		// Restore saved code
 		readData( addressForCommand( currentCommand ), recordBuffer, 256 );
 		fprintf( &mystdout, "Restored byte sequence from EEPROM" );
+		
+		// Flash RED
+		RED_ON;
+		_delay_ms( 300 );
+		ALL_OFF;
 	}
 	else
 	{
@@ -183,6 +201,11 @@ void learn()
 		writePage( addressForCommand( nextCommand ), recordBuffer, 128 );		// First page
 		writePage( addressForCommand( nextCommand )+128	, recordBuffer+128, 128 );	// Second page
 		fprintf( &mystdout, "Done.\r\n" );
+		
+		// Flash GREEN
+		GREEN_ON;
+		_delay_ms( 300 );
+		ALL_OFF;
 	}
 }
 
@@ -206,7 +229,8 @@ int main(void)
 	enable_serial();
 	i2c_init();
 	sei();
-	DDRB |= (1<< PB0);	// PB0 -> output for debugging LED
+	DDRB |= (1<< PB0);	// PB0 -> output for debugging GREEN
+	DDRB |= (1<< PB1);	// PB1 -> output for debugging RED
 	DDRD |= (1<< PD5);	// OC0B/PD5 -> output
 	
 	// Zero the USART buffer
@@ -217,6 +241,17 @@ int main(void)
 		
 	fprintf( &mystdout, "BLE command mode\n\r" );
 
+	RED_ON;
+	_delay_ms( 200 );
+	YELLOW_ON;
+	_delay_ms( 200 );
+	GREEN_ON;
+	_delay_ms( 200 );
+	ALL_OFF;
+
+	// Pull-up on I2C pins PC4 and PC5. Oops – someone forgot to put those resistors on the PCB…
+	PORTC |= (1<< PC4) | (1<< PC5);
+	
 	// Main loop
 	for( ;; )
 	{
@@ -251,14 +286,14 @@ int main(void)
 				else
 				{
 					// Yes, we do: send it
-					PORTB |= (1<< PB0);		
+					GREEN_ON;
 					fprintf( &mystdout, "Transmitting...\r\n" );
 					sendSequence2( recordBuffer );
 					
 					// Wait a bit and send it again
 //					_delay_ms( 10 );
 //					sendSequence2( recordBuffer );
-					PORTB &= ~(1<< PB0);
+					ALL_OFF;
 				}
 				break;
 				
