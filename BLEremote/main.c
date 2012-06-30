@@ -23,13 +23,11 @@
 #define YELLOW_ON	PORTB |= (1<< PB0) | (1<< PB1);	
 #define ALL_OFF		PORTB &= ~(1<< PB0) & ~(1<< PB1);
 
-_delay_ms( 200 );
-		// YELLOW
-_delay_ms( 200 );
-		// GREEN
-_delay_ms( 200 );
-		// off
-
+#if defined( DEBUG )
+#define DEBUG_PRINT( stream, msg, ... ) fprintf( stream, msg,  ##__VA_ARGS__ )
+#else
+#define DEBUG_PRINT( stream, msg, ... )
+#endif
 
 // FSM states
 enum States
@@ -38,6 +36,7 @@ enum States
 	State_Learn,
 	State_Send,
 	State_Dump,
+	State_DidDisconnect,
 	State_SendTestCmd,
 	State_SendTestCmd2,
 	State_DidConnect
@@ -119,7 +118,7 @@ ISR( USART_RX_vect )
 		else if( usartBuffer[0] == 'D' )
 		{
 			// Write signal to serial
-			state = State_Dump;
+			state = State_DidDisconnect;
 		}
 		else if( usartBuffer[0] == 'T' )
 		{
@@ -153,16 +152,18 @@ static inline int addressForCommand( uint8_t commandNumber )
 void learn()
 {
 	IRError status;
+#ifdef DEBUG
 	unsigned int *data;
 	unsigned int i;
+#endif
 
 	// Clear the memory buffer
 	memset( recordBuffer, 0x00, 256 );
 
-	fprintf( &mystdout, "Ready to record...\n\r" );
+	DEBUG_PRINT( &mystdout, "Ready to record...\n\r" );
 			
 	// Read IR sequence
-	fprintf( &mystdout, "LEARN\r\n" );
+	DEBUG_PRINT( &mystdout, "LEARN\r\n" );
 	
 	YELLOW_ON;	
 	status = learnIR( recordBuffer );
@@ -171,41 +172,51 @@ void learn()
 	if( status != IRError_NoError )
 	{
 		// Error:
-		fprintf( &mystdout, "Error: %d\n\r", status );
+		DEBUG_PRINT( &mystdout, "Error: %d\n\r", status );
 		
 		// Restore saved code
 		readData( addressForCommand( currentCommand ), recordBuffer, 256 );
-		fprintf( &mystdout, "Restored byte sequence from EEPROM" );
+		DEBUG_PRINT( &mystdout, "Restored byte sequence from EEPROM" );
 		
 		// Flash RED
 		RED_ON;
-		_delay_ms( 300 );
-		ALL_OFF;
+		_delay_ms( 500 );
+		GREEN_ON;	// We switch back to green since we know we're connected. (Otherwise we couldn't send a code.)
 	}
 	else
 	{
 		// No error: print data
-		fprintf( &mystdout, "Read code: " );
+		DEBUG_PRINT( &mystdout, "Read code: " );
+#ifdef DEBUG
 		data = (unsigned int*)recordBuffer;
 		i=0;
 		while( *data )
 		{
-			fprintf( &mystdout, "%04x-", *data++ );
-			fprintf( &mystdout, "%04x ", *data++ );
+			DEBUG_PRINT( &mystdout, "%04x-", *data++ );
+			DEBUG_PRINT( &mystdout, "%04x ", *data++ );
 			i += 2;
 		}
-		fprintf( &mystdout, "00 <end>\r\n" );
+#endif
+		DEBUG_PRINT( &mystdout, "00 <end>\r\n" );
 		
 		// Store command in EEPROM
-		fprintf( &mystdout, "Storing %d bytes in EEPROM at address %d... ", i, addressForCommand( nextCommand ));
+		DEBUG_PRINT( &mystdout, "Storing %d bytes in EEPROM at address %d... ", i, addressForCommand( nextCommand ));
 		writePage( addressForCommand( nextCommand ), recordBuffer, 128 );		// First page
 		writePage( addressForCommand( nextCommand )+128	, recordBuffer+128, 128 );	// Second page
-		fprintf( &mystdout, "Done.\r\n" );
+		DEBUG_PRINT( &mystdout, "Done.\r\n" );
 		
-		// Flash GREEN
-		GREEN_ON;
-		_delay_ms( 300 );
+		// Flash GREEN twice
 		ALL_OFF;
+		_delay_ms( 100 );
+		GREEN_ON;			// Flash
+		_delay_ms( 100 );
+		ALL_OFF;
+		_delay_ms( 100 );
+		GREEN_ON;			// Flash
+		_delay_ms( 100 );
+		ALL_OFF;
+		_delay_ms( 100 );
+		GREEN_ON;			// Remain on (since we're connected)
 	}
 }
 
@@ -222,8 +233,10 @@ int commandLength( unsigned char *ptr )
 
 int main(void)
 {
+#ifdef DEBUG
 	unsigned int* data;
 	int i;
+#endif
 	
 	// Setup
 	enable_serial();
@@ -239,7 +252,7 @@ int main(void)
 	// Init IR
 	initIR();
 		
-	fprintf( &mystdout, "BLE command mode\n\r" );
+	DEBUG_PRINT( &mystdout, "BLE command mode\n\r" );
 
 	RED_ON;
 	_delay_ms( 200 );
@@ -273,7 +286,7 @@ int main(void)
 				{
 					// No: load it from EEPROM into SRAM first
 					readData( addressForCommand( nextCommand ), recordBuffer, 256 );
-					fprintf( &mystdout, "Read %d pairs from EEPROM at address %d for command %d\r\n", commandLength( recordBuffer ), addressForCommand( nextCommand ), nextCommand );
+					DEBUG_PRINT( &mystdout, "Read %d pairs from EEPROM at address %d for command %d\r\n", commandLength( recordBuffer ), addressForCommand( nextCommand ), nextCommand );
 					
 					// We now have correct command loaded
 					currentCommand = nextCommand;
@@ -281,38 +294,38 @@ int main(void)
 				
 				// Do we have valid data for the specified command?
 				if( recordBuffer[0] == 0xFF )
-					// No, we don't
-					fprintf( &mystdout, "No IR code stored – not transmitting.\r\n" );
+				{
+					// No, we don't: flash RED
+					RED_ON;
+					_delay_ms( 100 );
+					ALL_OFF;
+					_delay_ms( 100 );
+					RED_ON;
+					_delay_ms( 100 );
+					ALL_OFF;
+					_delay_ms( 100 );
+					GREEN_ON;
+					
+					DEBUG_PRINT( &mystdout, "No IR code stored – not transmitting.\r\n" );
+				}
 				else
 				{
 					// Yes, we do: send it
-					GREEN_ON;
-					fprintf( &mystdout, "Transmitting...\r\n" );
+					RED_ON;
+					DEBUG_PRINT( &mystdout, "Transmitting...\r\n" );
 					sendSequence2( recordBuffer );
-					
-					// Wait a bit and send it again
-//					_delay_ms( 10 );
-//					sendSequence2( recordBuffer );
-					ALL_OFF;
+					GREEN_ON;
 				}
 				break;
-				
-			case State_Dump:
-				fprintf( &mystdout, "Stored code:\r\n" );
-				data = (unsigned int*)recordBuffer;
-				i=0;
-				while( *data )
-				{
-					fprintf( &mystdout, "%04x-", *data++ );
-					fprintf( &mystdout, "%04x ", *data++ );
-					i += 2;
-				}
-				fprintf( &mystdout, "00 <end>\r\n" );
+
+			case State_DidDisconnect:
+				// Disconnect: turn off GREEN
+				ALL_OFF;
 				break;
 				
 			case State_DidConnect:
-				// Toggle full-power IR LED for power measurements
-				// PIND |= (1<< PD5);
+				// Connect: turn on GREEN
+				GREEN_ON;
 				break;
 				
 			default:
